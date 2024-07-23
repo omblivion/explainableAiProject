@@ -2,6 +2,7 @@ import argparse
 import os
 
 import pandas as pd
+import torch
 
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
@@ -29,11 +30,12 @@ def augment_with_metadata_and_topic(dataset, extractor, candidate_labels, file_p
         augmented_dataset = dataset
     return augmented_dataset
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Load dataset')
     parser.add_argument('--dataset_type', type=str, default='emotion', choices=['emotion', 'sarcasm'],
                         help='Type of dataset to load')
-    parser.add_argument('--debug', type=bool, default=True,
+    parser.add_argument('--debug', type=bool, default=False,
                         help='Enable debug mode to print additional information')
     parser.add_argument('--percentage', type=float, default=100.0,
                         help='Percentage of the dataset to use (e.g., 0.1 for 0.1%)')
@@ -41,6 +43,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print("Debugging is set to: ", args.debug)
     print("Percentage is set to: ", args.percentage)
+
+    print(torch.cuda.is_available())
+    print(torch.cuda.device_count())
+    print(torch.cuda.current_device())
+    print(torch.cuda.get_device_name(torch.cuda.current_device()))
 
     # Determine the base path relative to the location of the main.py script
     base_path = os.path.dirname(os.path.abspath(__file__))
