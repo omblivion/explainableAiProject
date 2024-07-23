@@ -17,6 +17,7 @@ The primary goal of this project is to identify interpretable representations of
 - Defining a hierarchy of categories to further enhance understanding.
 - Leveraging existing techniques for problematic subgroup identification.
 
+
 ## Required Analysis, Implementation, and Evaluation
 
 ### Literature Review
@@ -34,6 +35,22 @@ Identify key research gaps for evaluating subgroup performance and, optionally, 
 
 ### Evaluation
 Assess the effectiveness and applicability of the newly implemented approach using at least two datasets.
+
+## Usage
+
+### Running the Program
+
+To run the program, use the following command:
+
+```bash
+python main.py --dataset_type <dataset_type> --debug <debug_mode> --percentage <percentage>
+```
+
+Arguments
+
+    --dataset_type: Type of the dataset to load. Options are emotion or sarcasm. Default is emotion.
+    --debug: Enable debug mode to print additional information. Options are True or False. Default is False.
+    --percentage: Percentage of the dataset to use. For example, use 0.1 for 10% of the dataset. Default is 100.0.
 
 ## References
 
