@@ -63,29 +63,26 @@ def prepare_data(data, text_column='text', label_column='label', metadata_column
     return X, y
 
 
-def train_and_evaluate_classifier(X_train, y_train, X_test, y_test, X_val, y_val, text_column, metadata_columns):
-    """
-    Train and evaluate the text classifier on the given data.
-
-    :param X_train: Training features.
-    :param y_train: Training labels.
-    :param X_test: Test features.
-    :param y_test: Test labels.
-    :param X_val: Validation features.
-    :param y_val: Validation labels.
-    :param text_column: Name of the text column.
-    :param metadata_columns: List of metadata columns.
-    """
-    classifier = TextClassifier(text_column, metadata_columns)
+def train_and_evaluate_classifier(X_train, y_train, X_test, y_test, X_val, y_val, text_column, metadata_columns,
+                                  param_grid=None):
+    classifier = TextClassifier(text_column, metadata_columns, param_grid=param_grid)
     classifier.train(X_train, y_train)
 
     print("Evaluation on Test Data:")
     test_report = classifier.evaluate(X_test, y_test)
-    print(test_report)
+    print(test_report['classification_report'])
+    print(f"Accuracy: {test_report['accuracy']}")
+    print(f"F1 Score: {test_report['f1_score']}")
+    print(f"Precision: {test_report['precision']}")
+    print(f"Recall: {test_report['recall']}")
 
     print("Evaluation on Validation Data:")
     val_report = classifier.evaluate(X_val, y_val)
-    print(val_report)
+    print(val_report['classification_report'])
+    print(f"Accuracy: {val_report['accuracy']}")
+    print(f"F1 Score: {val_report['f1_score']}")
+    print(f"Precision: {val_report['precision']}")
+    print(f"Recall: {val_report['recall']}")
 
 
 def main(args):
@@ -141,8 +138,12 @@ def main(args):
 
     # Train and evaluate the metadata-included classifier
     print("Training and evaluating the metadata-included classifier")
+    param_grid = {
+        'classifier__C': [0.1, 1, 10],
+        'classifier__solver': ['lbfgs', 'liblinear']
+    }
     train_and_evaluate_classifier(X_train_meta, y_train_meta, X_test_meta, y_test_meta, X_val_meta, y_val_meta, 'text',
-                                  metadata_columns)
+                                  metadata_columns, param_grid)
 
 
 if __name__ == "__main__":
