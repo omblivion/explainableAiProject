@@ -31,11 +31,14 @@ def augment_with_metadata_and_topic(dataset, extractor, file_path, debug=False):
                 dataset.at[index, label] = 1 if race == label else 0
 
             # If debug mode is enabled, print debug information
+            percentage_complete = ((count + 1) / total_rows) * 100
             if debug:
                 # Calculate the percentage of completion
-                percentage_complete = ((count + 1) / total_rows) * 100
                 print(f"Text: {row['text']}")
                 print(f"Generated Metadata: Gender - {gender}, Race - {race}")
+                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+
+            if percentage_complete % 5 == 0:
                 print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
             # Increment the counter after processing each row
