@@ -1,39 +1,12 @@
 import argparse
 import os
 
-import pandas as pd
 import torch
 
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
+from agumentation import augment_with_metadata_and_topic
 from utils import print_demographic_distribution
-
-
-def augment_with_metadata_and_topic(dataset, extractor, gender_labels, race_labels, file_path, debug=False):
-    if os.path.exists(file_path):
-        print(f"Loading augmented dataset from {file_path}")
-        augmented_dataset = pd.read_csv(file_path)
-    else:
-        print(f"Augmenting dataset and saving to {file_path}")
-        total_rows = len(dataset)
-        count = 0
-        for index, row in dataset.iterrows():
-            gender = extractor.extract_gender(row['text'])
-            race = extractor.extract_race(row['text'])
-            for label in gender_labels:
-                dataset.at[index, label] = 1 if gender == label else 0
-            for label in race_labels:
-                dataset.at[index, label] = 1 if race == label else 0
-            if debug:
-                percentage_complete = ((count + 1) / total_rows) * 100
-                print(f"Text: {row['text']}")
-                print(f"Generated Metadata: Gender - {gender}, Race - {race}")
-                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
-            count += 1
-        dataset.to_csv(file_path, index=False)
-        augmented_dataset = dataset
-    return augmented_dataset
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Load dataset')
