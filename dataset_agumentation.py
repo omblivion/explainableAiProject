@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 
-def augment_with_metadata_and_topic(dataset, extractor, gender_labels, race_labels, file_path, debug=False):
+def augment_with_metadata_and_topic(dataset, extractor, file_path, debug=False):
     # Check if the augmented dataset already exists
     if os.path.exists(file_path):
         # If the file exists, load the augmented dataset from the CSV file
@@ -23,11 +23,11 @@ def augment_with_metadata_and_topic(dataset, extractor, gender_labels, race_labe
             race = extractor.extract_race(row['text'])
 
             # Update the dataset with gender metadata
-            for label in gender_labels:
+            for label in ["male", "female", "unknown"]:
                 dataset.at[index, label] = 1 if gender == label else 0
 
             # Update the dataset with race metadata
-            for label in race_labels:
+            for label in ["white", "black", "asian", "hispanic", "other", "non-identified"]:
                 dataset.at[index, label] = 1 if race == label else 0
 
             # If debug mode is enabled, print debug information
