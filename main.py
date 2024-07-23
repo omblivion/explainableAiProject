@@ -6,9 +6,10 @@ import torch
 
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
+from utils import print_demographic_distribution
 
 
-def augment_with_metadata_and_topic(dataset, extractor, candidate_labels, file_path, debug=False):
+def augment_with_metadata_and_topic(dataset, extractor, gender_labels, race_labels, file_path, debug=False):
     if os.path.exists(file_path):
         print(f"Loading augmented dataset from {file_path}")
         augmented_dataset = pd.read_csv(file_path)
@@ -17,13 +18,16 @@ def augment_with_metadata_and_topic(dataset, extractor, candidate_labels, file_p
         total_rows = len(dataset)
         count = 0
         for index, row in dataset.iterrows():
-            probabilities = extractor.extract_probabilities(row['text'], candidate_labels)
-            for label in candidate_labels:
-                dataset.at[index, label] = probabilities.get(label, 0)
+            gender = extractor.extract_gender(row['text'])
+            race = extractor.extract_race(row['text'])
+            for label in gender_labels:
+                dataset.at[index, label] = 1 if gender == label else 0
+            for label in race_labels:
+                dataset.at[index, label] = 1 if race == label else 0
             if debug:
                 percentage_complete = ((count + 1) / total_rows) * 100
                 print(f"Text: {row['text']}")
-                print("Generated Metadata:", probabilities)
+                print(f"Generated Metadata: Gender - {gender}, Race - {race}")
                 print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
             count += 1
         dataset.to_csv(file_path, index=False)
@@ -44,10 +48,9 @@ if __name__ == "__main__":
     print("Debugging is set to: ", args.debug)
     print("Percentage is set to: ", args.percentage)
 
-    print(torch.cuda.is_available())
-    print(torch.cuda.device_count())
-    print(torch.cuda.current_device())
-    print(torch.cuda.get_device_name(torch.cuda.current_device()))
+    print("Torch is available: ", torch.cuda.is_available())
+    print("Torch device count: ", torch.cuda.device_count())
+    print("Torch available device: ", torch.cuda.get_device_name(torch.cuda.current_device()))
 
     # Determine the base path relative to the location of the main.py script
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +59,8 @@ if __name__ == "__main__":
     dataset_loader.load_datasets()
 
     extractor = MetadataExtractor()
-    candidate_labels = ["happiness", "sadness", "anger", "fear", "love", "surprise"]
+    gender_labels = ["male", "female", "unknown"]
+    race_labels = ["white", "black", "asian", "hispanic", "other", "non-identified"]
 
     original_train_data = dataset_loader.train_data
     original_test_data = dataset_loader.test_data
@@ -66,24 +70,18 @@ if __name__ == "__main__":
     test_file_path = os.path.join(base_path, f"augmented_test_{args.dataset_type}_{args.percentage}.csv")
     val_file_path = os.path.join(base_path, f"augmented_val_{args.dataset_type}_{args.percentage}.csv")
 
-    augmented_train_data = augment_with_metadata_and_topic(original_train_data.copy(), extractor, candidate_labels,
-                                                           train_file_path, debug=args.debug)
-    augmented_test_data = augment_with_metadata_and_topic(original_test_data.copy(), extractor, candidate_labels,
-                                                          test_file_path, debug=args.debug)
-    augmented_val_data = augment_with_metadata_and_topic(original_val_data.copy(), extractor, candidate_labels,
-                                                         val_file_path, debug=args.debug)
+    augmented_train_data = augment_with_metadata_and_topic(original_train_data.copy(), extractor, gender_labels,
+                                                           race_labels, train_file_path, debug=args.debug)
+    augmented_test_data = augment_with_metadata_and_topic(original_test_data.copy(), extractor, gender_labels,
+                                                          race_labels, test_file_path, debug=args.debug)
+    augmented_val_data = augment_with_metadata_and_topic(original_val_data.copy(), extractor, gender_labels,
+                                                         race_labels, val_file_path, debug=args.debug)
 
-    if args.dataset_type == 'emotion':
-        print("Train Data")
-        print(augmented_train_data.head())
-        print("\nTest Data")
-        print(augmented_test_data.head())
-        print("\nValidation Data")
-        print(augmented_val_data.head())
-    elif args.dataset_type == 'sarcasm':
-        print("Train Data")
-        print(augmented_train_data.head())
-        print("\nValidation Data")
-        print(augmented_val_data.head())
-        print("\nTest Data")
-        print(augmented_test_data.head())
+    print("Train Data")
+    print_demographic_distribution(augmented_train_data)
+
+    print("\nValidation Data")
+    print_demographic_distribution(augmented_val_data)
+
+    print("\nTest Data")
+    print_demographic_distribution(augmented_test_data)
