@@ -1,12 +1,11 @@
 import json
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-
 class DatasetLoad:
-    def __init__(self, dataset_type):
+    def __init__(self, dataset_type, percentage=100.0):
         self.dataset_type = dataset_type
+        self.percentage = percentage
         self.train_data = None
         self.test_data = None
         self.val_data = None
@@ -34,3 +33,9 @@ class DatasetLoad:
         elif self.dataset_type == 'sarcasm':
             self.train_data, self.val_data, self.test_data = self.load_sarcasm_data(
                 'datasets/sarcasm_headlines/Sarcasm_Headlines_Dataset_v2.json')
+
+        if self.percentage < 100.0:
+            self.train_data = self.train_data.sample(frac=self.percentage / 100.0, random_state=42)
+            self.val_data = self.val_data.sample(frac=self.percentage / 100.0, random_state=42)
+            self.test_data = self.test_data.sample(frac=self.percentage / 100.0, random_state=42)
+
