@@ -4,14 +4,29 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipe
 
 class MetadataExtractor:
     def __init__(self):
-        # Check if GPU is available and set the device accordingly
-        self.device = 0 if torch.cuda.is_available() else -1
-        # Initialize the zero-shot classification pipeline with a specific model
+        # Check if GPUs are available and set the devices accordingly
+        self.devices = [i for i in range(torch.cuda.device_count())]
+
+        # Initialize the zero-shot classification pipelines with specific models
         self.MODEL = "roberta-large-mnli"
         self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.MODEL).to(self.device)
-        self.classifier = pipeline("zero-shot-classification", model=self.model, tokenizer=self.tokenizer,
-                                   device=self.device)
+        self.models = [
+            AutoModelForSequenceClassification.from_pretrained(self.MODEL).to(f'cuda:{device}')
+            for device in self.devices
+        ]
+        self.classifiers = [
+            pipeline("zero-shot-classification", model=model, tokenizer=self.tokenizer, device=device)
+            for model, device in zip(self.models, self.devices)
+        ]
+        self.current_device_index = 0
+
+    def _get_next_classifier(self):
+        """
+        Get the next classifier in a round-robin manner to distribute the workload.
+        """
+        classifier = self.classifiers[self.current_device_index]
+        self.current_device_index = (self.current_device_index + 1) % len(self.devices)
+        return classifier
 
     def extract_attribute(self, text, candidate_labels, hypothesis_template):
         """
@@ -22,8 +37,10 @@ class MetadataExtractor:
         :param hypothesis_template: A template for the hypothesis.
         :return: The label with the highest probability.
         """
+        # Get the classifier for the current task
+        classifier = self._get_next_classifier()
         # Perform zero-shot classification
-        result = self.classifier(text, candidate_labels, hypothesis_template=hypothesis_template)
+        result = classifier(text, candidate_labels, hypothesis_template=hypothesis_template)
         # Get the label with the highest probability
         top_label = result['labels'][0]
         return top_label
