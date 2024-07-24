@@ -19,7 +19,7 @@ def print_demographic_distribution(df):
         "non-identified": df["non-identified"].sum()
     }
 
-    print("Gender Distribution:")
+    print("Topics Distribution:")
     for gender, count in gender_counts.items():
         print(f"{gender.capitalize()}: {count}")
 

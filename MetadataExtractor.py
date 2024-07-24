@@ -45,24 +45,24 @@ class MetadataExtractor:
         top_label = result['labels'][0]
         return top_label
 
-    def extract_gender(self, text):
+    def extract_gender(self, text, candidate_labels):
         """
         Extracts the gender from the given text.
 
+        :param candidate_labels:
         :param text: The text to classify.
         :return: The gender label with the highest probability.
         """
-        candidate_labels = ["male", "female", "unknown"]
         hypothesis_template = "The person described in this text is {}."
         return self.extract_attribute(text, candidate_labels, hypothesis_template)
 
-    def extract_race(self, text):
+    def extract_topic(self, text, candidate_labels):
         """
-        Extracts the race from the given text.
+        Extracts the topic from the given text.
 
+        :param candidate_labels:
         :param text: The text to classify.
-        :return: The race label with the highest probability.
+        :return: The topic label with the highest probability.
         """
-        candidate_labels = ["white", "black", "asian", "hispanic", "other", "non-identified"]
-        hypothesis_template = "The person described in this text is {}."
+        hypothesis_template = "The topic of this text is {}."
         return self.extract_attribute(text, candidate_labels, hypothesis_template)
