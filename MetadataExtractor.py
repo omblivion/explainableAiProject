@@ -5,25 +5,35 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipe
 class MetadataExtractor:
     def __init__(self):
         # Check if GPUs are available and set the devices accordingly
-        self.devices = [i for i in range(torch.cuda.device_count())]
+        if torch.cuda.device_count() > 0:
+            self.devices = [i for i in range(torch.cuda.device_count())]
 
-        # Initialize the zero-shot classification pipelines with specific models
-        self.MODEL = "roberta-large-mnli"
-        self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL)
-        self.models = [
-            AutoModelForSequenceClassification.from_pretrained(self.MODEL).to(f'cuda:{device}')
-            for device in self.devices
-        ]
-        self.classifiers = [
-            pipeline("zero-shot-classification", model=model, tokenizer=self.tokenizer, device=device)
-            for model, device in zip(self.models, self.devices)
-        ]
-        self.current_device_index = 0
+            # Initialize the zero-shot classification pipelines with specific models
+            self.MODEL = "roberta-large-mnli"
+            self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL)
+            self.models = [
+                AutoModelForSequenceClassification.from_pretrained(self.MODEL).to(f'cuda:{device}')
+                for device in self.devices
+            ]
+            self.classifiers = [
+                pipeline("zero-shot-classification", model=model, tokenizer=self.tokenizer, device=device)
+                for model, device in zip(self.models, self.devices)
+            ]
+            self.current_device_index = 0
+        else:
+            # Initialize the zero-shot classification pipelines with specific models
+            self.MODEL = "roberta-large-mnli"
+            self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL)
+            self.models = AutoModelForSequenceClassification.from_pretrained(self.MODEL)
+            self.classifiers = pipeline("zero-shot-classification", model=self.models, tokenizer=self.tokenizer, device=None)
+            self.devices = []
 
     def _get_next_classifier(self):
         """
         Get the next classifier in a round-robin manner to distribute the workload.
         """
+        if not self.devices: #without CUDA devices the list is empty
+            return self.classifiers
         classifier = self.classifiers[self.current_device_index]
         self.current_device_index = (self.current_device_index + 1) % len(self.devices)
         return classifier
