@@ -54,24 +54,34 @@ def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels
 
 
 # Function to predict sentiment for a dataset
-def predict_sentiment(dataset, sentimentAnalyzer, debug=False):
-    sentiments = []
-    total_rows = len(dataset)
+def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False):
+    if os.path.exists(file_path):
+        # If the file exists, load the sentiment-augmented dataset from the CSV file
+        print(f"Loading sentiment-augmented dataset from {file_path}")
+        sentiment_augmented_dataset = pd.read_csv(file_path)
+    else:
+        # If the file does not exist, proceed with sentiment prediction
+        print(f"Predicting sentiment and saving to {file_path}")
+        sentiments = []
+        total_rows = len(dataset)
+        count = 0
 
-    count = 0
-    for index, row in dataset.iterrows():
-        sentiment_label = sentimentAnalyzer.analyze_sentiment(row['text'])
-        sentiment_target = sentimentAnalyzer.map_label_to_target(sentiment_label)
-        sentiments.append(sentiment_target)
-        count += 1
+        for index, row in dataset.iterrows():
+            sentiment_label = sentiment_analyzer.analyze_sentiment(row['text'])
+            sentiment_target = sentiment_analyzer.map_label_to_target(sentiment_label)
+            sentiments.append(sentiment_target)
+            count += 1
 
-        # Calculate the percentage of completion
-        percentage_complete = ((count + 1) / total_rows) * 100
-        if debug:
-            print(f"Text: {row['text']} Sentiment - {sentiment_label}")
-            print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
-        if percentage_complete % 5 == 0:
-            print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+            # Calculate the percentage of completion
+            percentage_complete = ((count + 1) / total_rows) * 100
+            if debug:
+                print(f"Text: {row['text']} Sentiment - {sentiment_label}")
+                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+            if percentage_complete % 5 == 0:
+                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
-    dataset['sentiment'] = sentiments
-    return dataset
+        dataset['sentiment'] = sentiments
+        dataset.to_csv(file_path, index=False)
+        sentiment_augmented_dataset = dataset
+
+    return sentiment_augmented_dataset

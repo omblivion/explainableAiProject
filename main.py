@@ -42,10 +42,18 @@ if __name__ == "__main__":
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
 
+    # Extract metadata for the datasets
+    train_sentiment_file_name = f'train_sentiment_{args.dataset_type}_{args.percentage}.csv'
+    test_sentiment_file_name = f'test_sentiment_{args.dataset_type}_{args.percentage}.csv'
+    val_sentiment_file_name = f'val_sentiment_{args.dataset_type}_{args.percentage}.csv'
+
     # Predict sentiment for the datasets
-    train_data_with_sentiment = predict_sentiment(original_train_data.copy(), sentiment_analyzer, args.debug)
-    test_data_with_sentiment = predict_sentiment(original_test_data.copy(), sentiment_analyzer, args.debug)
-    val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, args.debug)
+    train_data_with_sentiment = predict_sentiment(original_train_data.copy(), sentiment_analyzer,
+                                                  train_sentiment_file_name, args.debug)
+    test_data_with_sentiment = predict_sentiment(original_test_data.copy(), sentiment_analyzer,
+                                                 test_sentiment_file_name, args.debug)
+    val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
+                                                args.debug)
 
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
@@ -55,12 +63,16 @@ if __name__ == "__main__":
     topic_labels = ["politics", "news", "entertainment", "unknown"]
 
     # Extract metadata for the datasets
+    train_file_name = f'train_augmented_{args.dataset_type}_{args.percentage}.csv'
+    test_file_name = f'test_augmented_{args.dataset_type}_{args.percentage}.csv'
+    val_file_name = f'val_augmented_{args.dataset_type}_{args.percentage}.csv'
+
     train_data_with_metadata = augment_and_extract_metadata(train_data_with_sentiment.copy(), extractor, gender_labels,
-                                                            topic_labels, 'train_augmented.csv', args.debug)
+                                                            topic_labels, train_file_name, args.debug)
     test_data_with_metadata = augment_and_extract_metadata(test_data_with_sentiment.copy(), extractor, gender_labels,
-                                                           topic_labels, 'test_augmented.csv', args.debug)
+                                                           topic_labels, test_file_name, args.debug)
     val_data_with_metadata = augment_and_extract_metadata(val_data_with_sentiment.copy(), extractor, gender_labels,
-                                                          topic_labels, 'val_augmented.csv', args.debug)
+                                                          topic_labels, val_file_name, args.debug)
 
 
     # Function to create subgroups based on metadata
