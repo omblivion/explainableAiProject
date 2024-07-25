@@ -53,8 +53,7 @@ def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels
     return augmented_dataset
 
 
-# Function to predict sentiment for a dataset
-def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False):
+def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False, batch_size=32):
     if os.path.exists(file_path):
         # If the file exists, load the sentiment-augmented dataset from the CSV file
         print(f"Loading sentiment-augmented dataset from {file_path}")
@@ -62,23 +61,31 @@ def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False):
     else:
         # If the file does not exist, proceed with sentiment prediction
         print(f"Predicting sentiment and saving to {file_path}")
-        sentiments = []
         total_rows = len(dataset)
-        count = 0
+        sentiments = []
 
-        for index, row in dataset.iterrows():
-            sentiment_label = sentiment_analyzer.analyze_sentiment(row['text'])
-            sentiment_target = sentiment_analyzer.map_label_to_target(sentiment_label)
-            sentiments.append(sentiment_target)
-            count += 1
+        # Process the dataset in batches
+        for start in range(0, total_rows, batch_size):
+            end = min(start + batch_size, total_rows)
+            # Extract a batch of texts from the dataset
+            batch_texts = dataset['text'][start:end].tolist()
+
+            # Use the sentiment analyzer to classify the sentiments of the batch of texts
+            batch_results = sentiment_analyzer.classifier(batch_texts)
+
+            # Map the sentiment labels to target values for each result in the batch
+            batch_sentiments = [sentiment_analyzer.map_label_to_target(result['label']) for result in batch_results]
+
+            # Extend the sentiments list with the batch sentiments
+            sentiments.extend(batch_sentiments)
 
             # Calculate the percentage of completion
-            percentage_complete = ((count + 1) / total_rows) * 100
+            percentage_complete = ((end) / total_rows) * 100
             if debug:
-                print(f"Text: {row['text']} Sentiment - {sentiment_label}")
-                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+                print(f"Processed batch {start // batch_size + 1}: {start} to {end}")
+                print(f"Percentage of Completion: {percentage_complete:.2f}%, {end} of {total_rows}")
             if percentage_complete % 5 == 0:
-                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+                print(f"Percentage of Completion: {percentage_complete:.2f}%")
 
         dataset['sentiment'] = sentiments
         dataset.to_csv(file_path, index=False)
