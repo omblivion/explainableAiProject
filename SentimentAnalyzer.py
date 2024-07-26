@@ -34,10 +34,13 @@ class SentimentAnalyzer:
 
         # Tokenize the data
         def tokenize_function(examples):
-            return self.tokenizer(examples['text'], padding="max_length", truncation=True)
+            return self.tokenizer(examples['text'], padding="max_length", truncation=True, max_length=128)
 
         train_dataset = Dataset.from_pandas(train_data)
         tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
+
+        # Remove columns not required for training
+        tokenized_train_dataset = tokenized_train_dataset.remove_columns(["text", "__index_level_0__"])
 
         # Set up training arguments
         training_args = TrainingArguments(
