@@ -43,11 +43,15 @@ if __name__ == "__main__":
 
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
+    # Fine-tune the sentiment analyzer
+    # print("Fine-tuning the model...")
+    # fine_tuning_results = sentiment_analyzer.fine_tune(dataset, epochs=args.epochs, batch_size=args.batch_size,
+    #                                                    learning_rate=args.learning_rate)
+    # print("Fine-tuning completed.")
 
-    # Extract metadata for the datasets
+    # Define the file names for the sentiment predictions
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-    # Extract metadata for the datasets
     train_sentiment_file_name = os.path.join(base_path, f'train_sentiment_{args.dataset_type}_{args.percentage}.csv')
     test_sentiment_file_name = os.path.join(base_path, f'test_sentiment_{args.dataset_type}_{args.percentage}.csv')
     val_sentiment_file_name = os.path.join(base_path, f'val_sentiment_{args.dataset_type}_{args.percentage}.csv')
@@ -62,19 +66,19 @@ if __name__ == "__main__":
 
 
     # Compute metrics for the train dataset
-    train_true_labels = original_train_data['target']
+    train_true_labels = train_data_with_sentiment['target']
     train_predicted_labels = train_data_with_sentiment['sentiment']
     print("\nTrain Classification Report:")
     print(classification_report(train_true_labels, train_predicted_labels, labels=[0, 2, 4], zero_division=0))
 
     # Compute metrics for the test dataset
-    test_true_labels = original_test_data['target']
+    test_true_labels = test_data_with_sentiment['target']
     test_predicted_labels = test_data_with_sentiment['sentiment']
     print("\nTest Classification Report:")
     print(classification_report(test_true_labels, test_predicted_labels, labels=[0, 2, 4], zero_division=0))
 
     # Compute metrics for the validation dataset
-    val_true_labels = original_val_data['target']
+    val_true_labels = val_data_with_sentiment['target']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
     print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 2, 4], zero_division=0))
@@ -100,7 +104,6 @@ if __name__ == "__main__":
                                                            topic_labels, test_file_name, args.debug)
     val_data_with_metadata = augment_and_extract_metadata(val_data_with_sentiment.copy(), extractor,
                                                           topic_labels, val_file_name, args.debug)
-
 
     # Function to create subgroups based on metadata
     def create_subgroups(dataset):
