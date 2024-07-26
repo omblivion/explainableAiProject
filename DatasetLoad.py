@@ -20,7 +20,7 @@ class DatasetLoad:
         self.test_data = None
         self.val_data = None
 
-    def load_tweet_data(self, file_path):
+    def load_data(self, file_path):
         """
         Load the tweet dataset from a CSV file.
 
@@ -30,25 +30,28 @@ class DatasetLoad:
         full_path = os.path.join(self.base_path, file_path)
         if not os.path.exists(full_path):
             raise FileNotFoundError(f"File not found: {full_path}")
-        data = pd.read_csv(full_path, delimiter=',', header=None,
-                           names=['target', 'ids', 'date', 'flag', 'user', 'text'],
-                           encoding='ISO-8859-1')
-        data = data.drop(columns=['ids', 'date', 'flag', 'user'])
+        data = pd.read_csv(full_path, delimiter=',')
         return data
 
-    def load_datasets(self):
-        """
-        Load the datasets based on the dataset type and apply percentage sampling if needed.
-        """
-        if self.dataset_type == 'TODO':
-            pass  # TODO
-        elif self.dataset_type == 'tweets':
-            data = self.load_tweet_data('datasets/tweets_dataset.csv')
-            train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
-            self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
-            self.train_data = train_data
 
-        if self.percentage < 100.0:
-            self.train_data = self.train_data.sample(frac=self.percentage / 100.0, random_state=42)
-            self.val_data = self.val_data.sample(frac=self.percentage / 100.0, random_state=42)
-            self.test_data = self.test_data.sample(frac=self.percentage / 100.0, random_state=42)
+def load_datasets(self):
+    """
+    Load the datasets based on the dataset type and apply percentage sampling if needed.
+    Ensure the first column is 'text' and the second column is 'category'.
+    """
+    if self.dataset_type == 'reddit':
+        data = self.load_data('datasets/Reddit_Data.csv')
+    elif self.dataset_type == 'tweets':
+        data = self.load_data('datasets/Twitter_Data.csv')
+
+    # Ensure the first column is 'text' and the second column is 'category'
+    data.columns = ['text', 'category'] + list(data.columns[2:])
+
+    train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
+    self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+    self.train_data = train_data
+
+    if self.percentage < 100.0:
+        self.train_data = self.train_data.sample(frac=self.percentage / 100.0, random_state=42)
+        self.val_data = self.val_data.sample(frac=self.percentage / 100.0, random_state=42)
+        self.test_data = self.test_data.sample(frac=self.percentage / 100.0, random_state=42)
