@@ -48,7 +48,7 @@ class DatasetLoad:
             # drop the ID column, axis=1
             data = data.drop('Id', axis=1)
             # convert category from text to -1, 0, 1
-            data['category'] = data['Category'].map({'Negative': -1, 'Neutral': 0, 'Positive': 1})
+            data['category'] = data['Category'].map({'negative': -1, 'neutral': 0, 'positive': 1})
             data = data.drop('Category', axis=1)
             # rename 'tweet' column to 'text'
             data = data.rename(columns={'Tweet': 'text'})
