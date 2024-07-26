@@ -1,7 +1,8 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
-
+# Suppress specific warnings
+warnings.filterwarnings("ignore", message="Some weights of the model checkpoint.*")
 class MetadataExtractor:
     def __init__(self):
         # Check if GPUs are available and set the devices accordingly
