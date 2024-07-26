@@ -46,9 +46,9 @@ if __name__ == "__main__":
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
 
-    # Fine-tune the sentiment analyzer with the original dataset
-    fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
-    print(f"Fine-tuning results: {fine_tuning_results}")
+    # # Fine-tune the sentiment analyzer with the original dataset
+    # fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
+    # print(f"Fine-tuning results: {fine_tuning_results}")
 
     # Extract metadata for the datasets
     base_path = os.path.dirname(os.path.abspath(__file__))
