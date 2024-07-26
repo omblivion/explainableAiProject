@@ -1,14 +1,12 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
-from datasets import Dataset
-from sklearn.model_selection import train_test_split
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 class SentimentAnalyzer:
     def __init__(self):
-        self.model_name = "cardiffnlp/twitter-roberta-base-sentiment"
+        self.model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
         self.device = 0 if torch.cuda.is_available() else -1  # Use GPU if available
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=3).to(self.device)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, ignore_mismatched_sizes=True).to(self.device)
         self.classifier = pipeline("sentiment-analysis", model=self.model, tokenizer=self.tokenizer, device=self.device)
 
     def analyze_sentiment(self, text):
@@ -16,12 +14,13 @@ class SentimentAnalyzer:
         return results[0]['label']
 
     def map_label_to_target(self, label):
+        # Map the sentiment label to the target value
         if label == "negative" or label == "Negative":
-            return 0
+            return -1
         elif label == "neutral" or label == "Neutral":
-            return 1
+            return 0
         elif label == "positive" or label == "Positive":
-            return 2
+            return 1
         else:
             return None
 
