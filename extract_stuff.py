@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 
-def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels, file_path, debug=False):
+def augment_and_extract_metadata(dataset, extractor, topic_labels, file_path, debug=False):
     if os.path.exists(file_path):
         # If the file exists, load the augmented dataset from the CSV file
         print(f"Loading augmented dataset from {file_path}")

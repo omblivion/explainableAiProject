@@ -89,11 +89,11 @@ if __name__ == "__main__":
     test_file_name = f'test_augmented_{args.dataset_type}_{args.percentage}.csv'
     val_file_name = f'val_augmented_{args.dataset_type}_{args.percentage}.csv'
 
-    train_data_with_metadata = augment_and_extract_metadata(train_data_with_sentiment.copy(), extractor, gender_labels,
+    train_data_with_metadata = augment_and_extract_metadata(train_data_with_sentiment.copy(), extractor,
                                                             topic_labels, train_file_name, args.debug)
-    test_data_with_metadata = augment_and_extract_metadata(test_data_with_sentiment.copy(), extractor, gender_labels,
+    test_data_with_metadata = augment_and_extract_metadata(test_data_with_sentiment.copy(), extractor,
                                                            topic_labels, test_file_name, args.debug)
-    val_data_with_metadata = augment_and_extract_metadata(val_data_with_sentiment.copy(), extractor, gender_labels,
+    val_data_with_metadata = augment_and_extract_metadata(val_data_with_sentiment.copy(), extractor,
                                                           topic_labels, val_file_name, args.debug)
 
 
