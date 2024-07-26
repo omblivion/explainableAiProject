@@ -51,7 +51,7 @@ class DatasetLoad:
             data['category'] = data['Category'].map({'Negative': -1, 'Neutral': 0, 'Positive': 1})
             data = data.drop('Category', axis=1)
             # rename 'tweet' column to 'text'
-            data = data.rename(columns={'tweet': 'text'})
+            data = data.rename(columns={'Tweet': 'text'})
 
         # Ensure the first column is 'text' and the second column is 'category'
         data = data[['text', 'category'] + [col for col in data.columns if col not in ['text', 'category']]]
