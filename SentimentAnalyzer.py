@@ -58,8 +58,8 @@ class SentimentAnalyzer:
 
     # Augment the training data with synthetic data
     def generate_training_data(self, topics, texts, sentiments, n_samples=6):
-        generated_data = {'text': [], 'label': []}
-        generated_data_with_topic = {'text': [], 'label': [], 'topic': []}
+        generated_data = {'text': [], 'category': []}
+        generated_data_with_topic = {'text': [], 'category': [], 'topic': []}
 
         for topic, text, sentiment in zip(topics, texts, sentiments):
             sentiment_text = self.map_target_to_label(sentiment)
