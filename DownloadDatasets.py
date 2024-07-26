@@ -9,8 +9,8 @@ def download_datasets():
         "tweets_dataset": "https://drive.google.com/file/d/1uw_FBtp7ak2B6VAyt9R7cKfiTVe2buqG/view?usp=sharing"
     }
 
-    # Get the current working directory
-    base_path = os.getcwd()
+    # Get the directory where main.py is located
+    base_path = os.path.dirname(os.path.abspath(__file__))
 
     # Create the dataset directory if it doesn't exist
     dataset_dir = os.path.join(base_path, "datasets")
