@@ -19,6 +19,7 @@ class SentimentAnalyzer:
         self.flan_model_name = "google/flan-t5-small"
         self.flan_tokenizer = AutoTokenizer.from_pretrained(self.flan_model_name)
         self.flan_model = AutoModelForSeq2SeqLM.from_pretrained(self.flan_model_name).to(self.device)
+
     def analyze_sentiment(self, text):
         results = self.classifier(text)
         return results[0]['label']
@@ -48,7 +49,7 @@ class SentimentAnalyzer:
                 do_sample=True,
                 top_k=50,
                 top_p=0.95,
-                temperature=0.7
+                temperature=0.99  # Adjusted temperature for more randomness
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
