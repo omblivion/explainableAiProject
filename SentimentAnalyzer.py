@@ -39,9 +39,17 @@ class SentimentAnalyzer:
         synthetic_data = []
         count = 0
         for _ in range(n_samples):
-            prompt = f"Generate a tweet related to {topic} sentiment similar to: '{text}' "
+            prompt = f"Generate a tweet related to {topic} sentiment similar to: '{text}'"
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
-            outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
+            outputs = self.flan_model.generate(
+                inputs.input_ids,
+                max_length=60,
+                num_return_sequences=1,
+                do_sample=True,
+                top_k=50,
+                top_p=0.95,
+                temperature=0.7
+            )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
             count += 1
