@@ -14,20 +14,13 @@ def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels
         total_rows = len(dataset)
         count = 0
 
-        genders = []
         topics = []
 
         # Iterate over each row in the dataset
         for index, row in dataset.iterrows():
-            # Extract gender and topic using the extractor
-            gender = extractor.extract_gender(row['text'], gender_labels)
+            # Extract topic using the extractor
             topic = extractor.extract_topic(row['text'], topic_labels)
-
-            genders.append(gender)
             topics.append(topic)
-
-            for label in gender_labels:
-                dataset.at[index, label] = 1 if gender == label else 0
 
             for label in topic_labels:
                 dataset.at[index, label] = 1 if topic == label else 0
@@ -36,7 +29,7 @@ def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels
             percentage_complete = ((count + 1) / total_rows) * 100
             if debug:
                 print(f"Text: {row['text']}")
-                print(f"Generated Metadata: Gender - {gender}, Topic - {topic}")
+                print(f"Generated Metadata: Topic - {topic}")
                 print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
             if percentage_complete % 5 == 0:
@@ -44,7 +37,6 @@ def augment_and_extract_metadata(dataset, extractor, gender_labels, topic_labels
 
             count += 1
 
-        dataset['gender'] = genders
         dataset['topic'] = topics
 
         dataset.to_csv(file_path, index=False)

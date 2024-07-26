@@ -81,9 +81,8 @@ if __name__ == "__main__":
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
 
-    # Define gender and topic labels
-    gender_labels = ["male", "female", "unknown"]
-    topic_labels = ["politics", "news", "entertainment", "science", "other"]
+    # Define topic labels
+    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food", "other"]
 
     # Extract metadata for the datasets
     train_file_name = f'train_augmented_{args.dataset_type}_{args.percentage}.csv'
@@ -101,10 +100,9 @@ if __name__ == "__main__":
     # Function to create subgroups based on metadata
     def create_subgroups(dataset):
         subgroups = {}
-        for gender in gender_labels:
-            for topic in topic_labels:
-                subgroup_name = f"{gender}_{topic}"
-                subgroups[subgroup_name] = dataset[(dataset['gender'] == gender) & (dataset['topic'] == topic)]
+        for topic in topic_labels:
+            subgroup_name = f"{topic}"
+            subgroups[subgroup_name] = dataset[dataset['topic'] == topic]
         return subgroups
 
 

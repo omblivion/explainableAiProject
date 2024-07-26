@@ -44,17 +44,6 @@ class MetadataExtractor:
         top_label = result['labels'][0]
         return top_label
 
-    def extract_gender(self, text, candidate_labels):
-        """
-        Extracts the gender from the given text.
-
-        :param candidate_labels:
-        :param text: The text to classify.
-        :return: The gender label with the highest probability.
-        """
-        hypothesis_template = "The person described in this text is {}."
-        return self.extract_attribute(text, candidate_labels, hypothesis_template)
-
     def extract_topic(self, text, candidate_labels):
         """
         Extracts the topic from the given text.
