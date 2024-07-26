@@ -1,14 +1,14 @@
 import argparse
 import os
-import wandb
+
 import pandas as pd
 import torch
 from sklearn.metrics import classification_report
+
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
-
 
 os.environ["WANDB_API_KEY"] = "21cb0c9433eeca19401ee01e9b1bc9e4b6f7a696"
 
@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     # Extract metadata for the datasets
     base_path = os.path.dirname(os.path.abspath(__file__))
+    model_save_path = os.path.join(base_path, f'sentiment_model_{args.dataset_type}_{args.percentage}.pt')
     # Check if a saved model exists
     if os.path.exists(model_save_path):
         print("Loading the fine-tuned model from disk...")
