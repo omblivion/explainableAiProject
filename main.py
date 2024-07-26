@@ -43,6 +43,8 @@ if __name__ == "__main__":
     original_test_data = dataset_loader.test_data
     original_val_data = dataset_loader.val_data
 
+    original_train_data.head(5)
+
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
 
