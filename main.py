@@ -4,17 +4,14 @@ import pandas as pd
 import torch
 from sklearn.metrics import classification_report
 from DatasetLoad import DatasetLoad
-from DownloadDatasets import download_datasets
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
 
 if __name__ == "__main__":
-    download_datasets()
-
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
-    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'TODO'],
+    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'reddit'],
                         help='Type of dataset to load')
     parser.add_argument('--debug', type=bool, default=False,
                         help='Enable debug mode to print additional information')
@@ -23,7 +20,8 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     args = parser.parse_args()
-    print("Debugging is set to: ", args.debug)
+    debug = args.debug
+    print("Debugging is set to: ", debug)
     print("Percentage is set to: ", args.percentage)
 
     # Print Torch availability and device information
@@ -33,13 +31,17 @@ if __name__ == "__main__":
 
     # Initialize dataset loader with the specified type and base path
     base_path = os.path.dirname(os.path.abspath(__file__))
-    dataset_loader = DatasetLoad('tweets', base_path, args.percentage)
+    dataset_loader = DatasetLoad(args.dataset_type, base_path, args.percentage, debug)
     dataset_loader.load_datasets()
 
     # Load the original train, test, and validation datasets
     original_train_data = dataset_loader.train_data
     original_test_data = dataset_loader.test_data
     original_val_data = dataset_loader.val_data
+
+    if debug:
+        print("Original Train Data")
+        print(original_train_data.head())
 
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
@@ -61,23 +63,27 @@ if __name__ == "__main__":
                                                 args.debug)
 
 
+    if debug:
+        print("Train Data with Sentiment")
+        print(train_data_with_sentiment.head(60))
+
     # Compute metrics for the train dataset
-    train_true_labels = original_train_data['target']
+    train_true_labels = original_train_data['category']
     train_predicted_labels = train_data_with_sentiment['sentiment']
     print("\nTrain Classification Report:")
-    print(classification_report(train_true_labels, train_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(train_true_labels, train_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the test dataset
-    test_true_labels = original_test_data['target']
+    test_true_labels = original_test_data['category']
     test_predicted_labels = test_data_with_sentiment['sentiment']
     print("\nTest Classification Report:")
-    print(classification_report(test_true_labels, test_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(test_true_labels, test_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the validation dataset
-    val_true_labels = original_val_data['target']
+    val_true_labels = original_val_data['category']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
-    print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(val_true_labels, val_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
 
     # Initialize the metadata extractor
@@ -154,9 +160,9 @@ if __name__ == "__main__":
                 analysis_results.append({
                     'subgroup': subgroup_name,
                     'total': len(subgroup_data),
-                    'negative': sentiment_counts.get(0, 0),
-                    'neutral': sentiment_counts.get(2, 0),
-                    'positive': sentiment_counts.get(4, 0),
+                    'negative': sentiment_counts.get(-1, 0),
+                    'neutral': sentiment_counts.get(0, 0),
+                    'positive': sentiment_counts.get(1, 0),
                 })
         return pd.DataFrame(analysis_results)
 
