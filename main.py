@@ -165,9 +165,90 @@ if __name__ == "__main__":
     least_performing_topics = train_metrics[train_metrics['accuracy'] < overall_accuracy]['topic'].tolist()
     print(f"Least performing topics: {least_performing_topics}")
 
+
+    # Function to analyze disparities in sentiment predictions
+    def analyze_disparities(subgroups):
+        analysis_results = []
+        for subgroup_name, subgroup_data in subgroups.items():
+            if not subgroup_data.empty:
+                sentiment_counts = subgroup_data['sentiment'].value_counts(normalize=True) * 100
+                analysis_results.append({
+                    'subgroup': subgroup_name,
+                    'total': len(subgroup_data),
+                    'negative': sentiment_counts.get(0, 0),
+                    'neutral': sentiment_counts.get(1, 0),
+                    'positive': sentiment_counts.get(2, 0),
+                })
+        return pd.DataFrame(analysis_results)
+
+
+    # Analyze disparities for the datasets
+    train_analysis = analyze_disparities(train_subgroups)
+    test_analysis = analyze_disparities(test_subgroups)
+    val_analysis = analyze_disparities(val_subgroups)
+
+    # Print the analysis results
+    print("Train Percentage Analysis")
+    print(train_analysis)
+    print("\nTest Percentage Analysis")
+    print(test_analysis)
+    print("\nValidation Percentage Analysis")
+    print(val_analysis)
+
+
+    def weighted_metrics(metrics_df, support_df, metric='accuracy'):
+        # Join metrics with their respective support counts
+        metrics_df = metrics_df.copy()
+        metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
+        metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['support']
+        return metrics_df
+
+
+    def get_top_bottom_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
+        # Get support for each topic
+        support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
+
+        # Compute weighted metrics
+        weighted_metrics_df = weighted_metrics(test_metrics_df, support_df, metric)
+
+        # Compute baseline accuracy
+        baseline_accuracy = weighted_metrics_df['accuracy'].mean()
+
+        # Sort topics by their weighted metrics
+        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)
+
+        # Get top 3 and bottom 3 topics
+        top_3_topics = sorted_metrics.head(3)['topic'].tolist()
+        bottom_3_topics = sorted_metrics.tail(3)['topic'].tolist()
+
+        # Adjust for baseline accuracy
+        bottom_3_topics_below_baseline = sorted_metrics[sorted_metrics['accuracy'] < baseline_accuracy].tail(3)[
+            'topic'].tolist()
+
+        return top_3_topics, bottom_3_topics_below_baseline
+
+
+    topics = get_top_bottom_topics(test_metrics, test_analysis, metric='accuracy')
+    print(f"Top 3 (lower score) topics: {topics[0]}")
+
+
+    def generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples):
+        # for each topic, select randomly n samples of text from the training data augmented with metadata (containing the topic). Then using the sentences as baseline, generate more that will later be useed to train the model
+        synthetic_texts = []
+        for topic in topics:
+            topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
+            topic_samples = topic_data.sample(n_samples, replace=True)
+            for index, row in topic_samples.iterrows():
+                synthetic_texts.extend(sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], n_samples))
+        return synthetic_texts
+
     # Generate and augment data for least performing topics
-    synthetic_texts = generate_and_augment_data(sentiment_analyzer, least_performing_topics, original_train_data,
-                                                n_samples=100)
+    synthetic_texts = generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata,
+                                                n_samples=10)
+    if args.debug:
+        print(f"Generated {len(synthetic_texts)} synthetic texts for least performing topics")
+        print("Sample synthetic texts:")
+        print(synthetic_texts[:5])
 
     # Create a new DataFrame for the synthetic data
     synthetic_df = pd.DataFrame({
@@ -182,33 +263,3 @@ if __name__ == "__main__":
     # Fine-tune the sentiment analyzer with the augmented dataset
     augmented_fine_tuning_results = sentiment_analyzer.fine_tune(augmented_train_data)
     print(f"Fine-tuning results with augmented data: {augmented_fine_tuning_results}")
-
-    # Function to analyze disparities in sentiment predictions
-    # def analyze_disparities(subgroups):
-    #     analysis_results = []
-    #     for subgroup_name, subgroup_data in subgroups.items():
-    #         if not subgroup_data.empty:
-    #             sentiment_counts = subgroup_data['sentiment'].value_counts(normalize=True) * 100
-    #             analysis_results.append({
-    #                 'subgroup': subgroup_name,
-    #                 'total': len(subgroup_data),
-    #                 'negative': sentiment_counts.get(0, 0),
-    #                 'neutral': sentiment_counts.get(1, 0),
-    #                 'positive': sentiment_counts.get(2, 0),
-    #             })
-    #     return pd.DataFrame(analysis_results)
-    #
-    #
-    # # Analyze disparities for the datasets
-    # train_analysis = analyze_disparities(train_subgroups)
-    # test_analysis = analyze_disparities(test_subgroups)
-    # val_analysis = analyze_disparities(val_subgroups)
-    #
-    # # Print the analysis results
-    # print("Train Percentage Analysis")
-    # print(train_analysis)
-    # print("\nTest Percentage Analysis")
-    # print(test_analysis)
-    # print("\nValidation Percentage Analysis")
-    # print(val_analysis)
-
