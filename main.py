@@ -10,7 +10,6 @@ from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
 
 if __name__ == "__main__":
-    download_datasets()
 
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
