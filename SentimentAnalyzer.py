@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
 
-from datasets import Dataset
+from datasets import Dataset, load_metric
 
 
 class SentimentAnalyzer:
@@ -10,7 +10,7 @@ class SentimentAnalyzer:
         self.model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
         self.device = 0 if torch.cuda.is_available() else -1  # Use GPU if available
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, ignore_mismatched_sizes=True).to(self.device)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name).to(self.device)
         self.classifier = pipeline("sentiment-analysis", model=self.model, tokenizer=self.tokenizer, device=self.device)
 
     def analyze_sentiment(self, text):
@@ -30,17 +30,17 @@ class SentimentAnalyzer:
     def fine_tune(self, train_data):
         # Ensure the training data includes labels
         if 'label' not in train_data.columns:
-            train_data['label'] = train_data['text'].apply(self.map_label_to_target)
+            train_data['label'] = train_data['category'].apply(self.map_label_to_target)
 
         # Tokenize the data
         def tokenize_function(examples):
-            return self.tokenizer(examples['text'], padding="max_length", truncation=True, max_length=128)
+            return self.tokenizer(examples['text'], padding="max_length", truncation=True)
 
         train_dataset = Dataset.from_pandas(train_data)
         tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
 
         # Remove columns not required for training
-        tokenized_train_dataset = tokenized_train_dataset.remove_columns(["text", "__index_level_0__"])
+        tokenized_train_dataset = tokenized_train_dataset.remove_columns(["text", "category", "__index_level_0__"])
 
         # Set up training arguments
         training_args = TrainingArguments(
@@ -68,6 +68,8 @@ class SentimentAnalyzer:
         return trainer.evaluate()
 
     def compute_metrics(self, p):
+        metric = load_metric("accuracy")
         preds = np.argmax(p.predictions, axis=1)
-        accuracy = (preds == p.label_ids).astype(np.float32).mean().item()
-        return {"accuracy": accuracy}
+        labels = p.label_ids
+        accuracy = metric.compute(predictions=preds, references=labels)
+        return accuracy
