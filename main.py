@@ -48,12 +48,18 @@ if __name__ == "__main__":
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
 
-    # Fine-tune the sentiment analyzer with the original dataset
-    fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
-    print(f"Fine-tuning results: {fine_tuning_results}")
-
     # Extract metadata for the datasets
     base_path = os.path.dirname(os.path.abspath(__file__))
+    # Check if a saved model exists
+    if os.path.exists(model_save_path):
+        print("Loading the fine-tuned model from disk...")
+        sentiment_analyzer.model = torch.load(model_save_path)
+    else:
+        print("Fine-tuning the sentiment analyzer with the original dataset...")
+        fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
+        print(f"Fine-tuning results: {fine_tuning_results}")
+        # Save the fine-tuned model
+        torch.save(sentiment_analyzer.model, model_save_path)
 
     # Extract metadata for the datasets
     train_sentiment_file_name = os.path.join(base_path, f'train_sentiment_{args.dataset_type}_{args.percentage}.csv')
