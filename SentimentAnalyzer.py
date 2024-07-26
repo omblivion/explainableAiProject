@@ -1,7 +1,10 @@
+import pandas as pd
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
 from sklearn.model_selection import train_test_split
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
+
 from datasets import Dataset
+
 
 class SentimentAnalyzer:
     def __init__(self):
@@ -84,7 +87,7 @@ class SentimentAnalyzer:
         # Define training arguments
         training_args = TrainingArguments(  # Define the training arguments
             output_dir="./results",
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             learning_rate=learning_rate,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
