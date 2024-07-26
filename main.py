@@ -133,9 +133,9 @@ if __name__ == "__main__":
                 analysis_results.append({
                     'subgroup': subgroup_name,
                     'total': len(subgroup_data),
-                    'negative': sentiment_counts.get(0, 0),
-                    'neutral': sentiment_counts.get(2, 0),
-                    'positive': sentiment_counts.get(4, 0),
+                    'negative': sentiment_counts.get(-1, 0),
+                    'neutral': sentiment_counts.get(0, 0),
+                    'positive': sentiment_counts.get(1, 0),
                 })
         return pd.DataFrame(analysis_results)
 

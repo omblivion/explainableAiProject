@@ -16,10 +16,10 @@ class SentimentAnalyzer:
     def map_label_to_target(self, label):
         # Map the sentiment label to the target value
         if label == "negative" or label == "Negative":
-            return 0
+            return -1
         elif label == "neutral" or label == "Neutral":
-            return 2
+            return 0
         elif label == "positive" or label == "Positive":
-            return 4
+            return 1
         else:
             return None
