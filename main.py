@@ -155,12 +155,6 @@ if __name__ == "__main__":
 
     print("Train Metrics per Topic")
     print(train_metrics)
-
-    # Identify the least performing topics
-    overall_accuracy = train_metrics['accuracy'].mean()
-    least_performing_topics = train_metrics[train_metrics['accuracy'] < overall_accuracy]['topic'].tolist()
-    print(f"Least performing training topics: {least_performing_topics}")
-
     print("\nTest Metrics per Topic")
     print(test_metrics)
     print("\nValidation Metrics per Topic")
@@ -234,8 +228,10 @@ if __name__ == "__main__":
 
 
     def generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples):
-        # for each topic, select randomly n samples of text from the training data augmented with metadata (containing the topic).
-        # Then using the sentences as baseline, generate more that will later be used to train the model
+        # Ensure topics is a list of individual topics
+        if isinstance(topics[0], list):
+            topics = [item for sublist in topics for item in sublist]
+
         synthetic_texts = []
         for topic in topics:
             topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
