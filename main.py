@@ -226,6 +226,7 @@ if __name__ == "__main__":
     top_3_topics, bottom_3_topics = get_top_lower_topics(val_metrics, val_analysis, metric='accuracy')
     print(f"Bottom 3 validation topics: {bottom_3_topics }")
 
+    print("Augmenting the training dataset with synthetic data...")
     # Randomly select rows from bottom three topics in the training set
     train_data_bottom_3 = train_data_with_metadata[train_data_with_metadata['topic'].isin(bottom_3_topics)]
     selected_samples = train_data_bottom_3.sample(n=50, random_state=42)    # Select n samples from the bottom 3 topics
@@ -242,12 +243,12 @@ if __name__ == "__main__":
     # Save the combined datasets
     train_original_and_generated_data.to_csv(os.path.join(base_path, 'train_original_and_generated_data.csv'), index=False)
 
-    model_save_path = os.path.join(base_path, f'finetuned_sentiment_model_{args.dataset_type}_{args.percentage}.pt')
+    model_save_path_v2 = os.path.join(base_path, f'finetuned_sentiment_model_{args.dataset_type}_{args.percentage}.pt')
     print("Fine-tuning the sentiment analyzer with the generated+original dataset...")
-    fine_tuning_results_new = sentiment_analyzer.fine_tune(new_training_data)  # TODO NON CE
+    fine_tuning_results_new = sentiment_analyzer.fine_tune(train_original_and_generated_data)  # TODO NON CE
     print(f"Fine-tuning results: {fine_tuning_results_new}")
     # Save the fine-tuned model
-    torch.save(sentiment_analyzer.model, model_save_path)
+    torch.save(sentiment_analyzer.model, model_save_path_v2)
 
     # Predict sentiment for the original dataset to see for improvements
     test_sentiment_file_name_v2 = os.path.join(base_path, f'test_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')

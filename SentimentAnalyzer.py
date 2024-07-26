@@ -54,6 +54,7 @@ class SentimentAnalyzer:
             outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
+            print(f"Generated Text: {generated_text}")
         return synthetic_data
 
     # Augment the training data with synthetic data
