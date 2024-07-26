@@ -70,19 +70,19 @@ if __name__ == "__main__":
 
 
     # Compute metrics for the train dataset
-    train_true_labels = original_train_data['target']
+    train_true_labels = original_train_data['category']
     train_predicted_labels = train_data_with_sentiment['sentiment']
     print("\nTrain Classification Report:")
     print(classification_report(train_true_labels, train_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the test dataset
-    test_true_labels = original_test_data['target']
+    test_true_labels = original_test_data['category']
     test_predicted_labels = test_data_with_sentiment['sentiment']
     print("\nTest Classification Report:")
     print(classification_report(test_true_labels, test_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the validation dataset
-    val_true_labels = original_val_data['target']
+    val_true_labels = original_val_data['category']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
     print(classification_report(val_true_labels, val_predicted_labels, labels=[-1, 0, 1], zero_division=0))
