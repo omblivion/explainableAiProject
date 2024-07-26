@@ -1,3 +1,5 @@
+import random
+
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
@@ -37,10 +39,13 @@ class SentimentAnalyzer:
 
     # Generate synthetic data using the FLAN model
     def generate_synthetic_data(self, topic, text, n_samples, debug=False):
+        print(f"Generating synthetic data for topic: {topic} and text: {text}")
         synthetic_data = []
         count = 0
         for _ in range(n_samples):
-            prompt = f"Generate a tweet related to {topic} sentiment similar to: '{text}'"
+            random_seed = random.randint(0, 10000)  # Generate a random seed for each sample
+            torch.manual_seed(random_seed)
+            prompt = f"Generate a tweet related to {topic} that is semantically similar to: '{text}'"
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
             outputs = self.flan_model.generate(
                 inputs.input_ids,
@@ -49,7 +54,7 @@ class SentimentAnalyzer:
                 do_sample=True,
                 top_k=50,
                 top_p=0.95,
-                temperature=0.99  # Adjusted temperature for more randomness
+                temperature=0.9  # Adjusted temperature for more randomness
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
