@@ -1,11 +1,10 @@
-import random
-
 import pandas as pd
 import torch
-from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
     DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
+
+from datasets import Dataset
 
 
 class SentimentAnalyzer:
@@ -37,18 +36,24 @@ class SentimentAnalyzer:
             return None
 
     # Generate synthetic data using the FLAN model
+    # Generate synthetic data using the FLAN model
     def generate_synthetic_data(self, topic, text, n_samples, debug=False):
         print(f"Generating synthetic data for topic: {topic} and text: {text}")
         synthetic_data = []
         count = 0
         for _ in range(n_samples):
-            random_seed = random.randint(0, 10000)  # Generate a random seed for each sample
-            torch.manual_seed(random_seed)
-            prompt = f"Generate a detailed and informative tweet about {topic}. The tweet should be semantically similar to: '{text}' and should provide insights or commentary related to {topic}. Make the tweet longer and more engaging."
+            # random_seed = random.randint(0, 10000)  # Generate a random seed for each sample
+            # torch.manual_seed(random_seed)
+            prompt = (
+                f"Generate a detailed and passionate comment on the topic of {topic}. "
+                f"The comment should be similar to this text: '{text}'. "
+                f"Make the comment informative, engaging, and relevant to the topic of {topic}. "
+                f"Ensure the comment is coherent and longer, providing more depth and insight."
+            )
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
             outputs = self.flan_model.generate(
                 inputs.input_ids,
-                max_length=100,  # Increase max_length for longer outputs
+                max_length=200,  # Increase max_length for longer outputs
                 num_return_sequences=1,
                 do_sample=True,
                 top_k=50,
