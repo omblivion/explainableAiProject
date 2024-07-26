@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from sklearn.model_selection import train_test_split
+from datasets import Dataset
 
 class SentimentAnalyzer:
     def __init__(self):
