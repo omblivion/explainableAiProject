@@ -22,7 +22,8 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     args = parser.parse_args()
-    print("Debugging is set to: ", args.debug)
+    debug = args.debug
+    print("Debugging is set to: ", debug)
     print("Percentage is set to: ", args.percentage)
 
     # Print Torch availability and device information
@@ -32,12 +33,16 @@ if __name__ == "__main__":
 
     # Initialize dataset loader with the specified type and base path
     base_path = os.path.dirname(os.path.abspath(__file__))
-    dataset_loader = DatasetLoad(args.dataset_type, base_path, args.percentage)
+    dataset_loader = DatasetLoad(args.dataset_type, base_path, args.percentage, debug)
 
     # Load the original train, test, and validation datasets
     original_train_data = dataset_loader.train_data
     original_test_data = dataset_loader.test_data
     original_val_data = dataset_loader.val_data
+
+    if debug:
+        print("Original Train Data")
+        print(original_train_data.head())
 
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()

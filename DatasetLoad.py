@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 
 class DatasetLoad:
-    def __init__(self, dataset_type, base_path, percentage=100.0):
+    def __init__(self, dataset_type, base_path, percentage=100.0, debug=False):
         """
         Initialize the DatasetLoad object.
 
@@ -40,8 +40,10 @@ def load_datasets(self):
     Ensure the first column is 'text' and the second column is 'category'.
     """
     if self.dataset_type == 'reddit':
+        print("Loading Reddit dataset...")
         data = self.load_data('datasets/Reddit_Data.csv')
     elif self.dataset_type == 'tweets':
+        print("Loading Twitter dataset...")
         data = self.load_data('datasets/Twitter_Data.csv')
 
     # Ensure the first column is 'text' and the second column is 'category'
