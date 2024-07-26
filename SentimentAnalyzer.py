@@ -1,9 +1,10 @@
 import pandas as pd
 import torch
-from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
     DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
+
+from datasets import Dataset
 
 
 class SentimentAnalyzer:
@@ -34,14 +35,19 @@ class SentimentAnalyzer:
             return None
 
     # Generate synthetic data using the FLAN model
-    def generate_synthetic_data(self, topic, text, n_samples):
+    def generate_synthetic_data(self, topic, text, n_samples, debug=False):
         synthetic_data = []
+        count = 0
         for _ in range(n_samples):
             prompt = f"Generate a tweet related to {topic} sentiment similar to: '{text}' "
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
             outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
+            count += 1
+            if debug:
+                print(f"Generated Text: {generated_text}")
+                print(f"Percentage of Completion: {count / n_samples * 100:.2f}%, {count} of {n_samples}")
         return synthetic_data
 
     # Augment the training data with synthetic data

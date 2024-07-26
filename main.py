@@ -237,7 +237,8 @@ if __name__ == "__main__":
             topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
             topic_samples = topic_data.sample(n_samples, replace=True)
             for index, row in topic_samples.iterrows():
-                synthetic_texts.extend(sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], 10))
+                synthetic_texts.extend(
+                    sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], 10, args.debug))
         return synthetic_texts
 
 
