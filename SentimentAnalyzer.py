@@ -65,7 +65,8 @@ class SentimentAnalyzer:
     # Fine-tune the model on a custom dataset
     def fine_tune(self, df, epochs=3, batch_size=16, learning_rate=2e-5):
         # Preprocess the dataset
-        df = df.rename(columns={"clean_text": "text", "category": "label"})     # Rename the columns
+        df = df.rename(columns={"text": "text", "category": "label"})     # Rename the columns
+        df['label'] = df['label'].astype(int)   # Ensure the labels are integers
         train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)        # Split the dataset
 
         train_dataset = Dataset.from_pandas(train_df)   # Load the dataset
@@ -89,6 +90,7 @@ class SentimentAnalyzer:
         # Define training arguments
         training_args = TrainingArguments(  # Define the training arguments
             output_dir="./results",
+            run_name="finetuning_sentiment_classifier",
             eval_strategy="epoch",
             learning_rate=learning_rate,
             per_device_train_batch_size=batch_size,
