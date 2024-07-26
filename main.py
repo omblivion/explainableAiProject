@@ -1,10 +1,11 @@
 import argparse
 import os
+
 import pandas as pd
 import torch
 from sklearn.metrics import classification_report
+
 from DatasetLoad import DatasetLoad
-from DownloadDatasets import download_datasets
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
@@ -68,19 +69,19 @@ if __name__ == "__main__":
     train_true_labels = original_train_data['target']
     train_predicted_labels = train_data_with_sentiment['sentiment']
     print("\nTrain Classification Report:")
-    print(classification_report(train_true_labels, train_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(train_true_labels, train_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the test dataset
     test_true_labels = original_test_data['target']
     test_predicted_labels = test_data_with_sentiment['sentiment']
     print("\nTest Classification Report:")
-    print(classification_report(test_true_labels, test_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(test_true_labels, test_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
     # Compute metrics for the validation dataset
     val_true_labels = original_val_data['target']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
-    print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 2, 4], zero_division=0))
+    print(classification_report(val_true_labels, val_predicted_labels, labels=[-1, 0, 1], zero_division=0))
 
 
     # Initialize the metadata extractor
@@ -157,9 +158,9 @@ if __name__ == "__main__":
                 analysis_results.append({
                     'subgroup': subgroup_name,
                     'total': len(subgroup_data),
-                    'negative': sentiment_counts.get(0, 0),
-                    'neutral': sentiment_counts.get(2, 0),
-                    'positive': sentiment_counts.get(4, 0),
+                    'negative': sentiment_counts.get(-1, 0),
+                    'neutral': sentiment_counts.get(0, 0),
+                    'positive': sentiment_counts.get(1, 0),
                 })
         return pd.DataFrame(analysis_results)
 
