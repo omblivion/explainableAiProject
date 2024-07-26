@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # Define gender and topic labels
     gender_labels = ["male", "female", "unknown"]
-    topic_labels = ["politics", "news", "entertainment", "other"]
+    topic_labels = ["politics", "news", "entertainment", "science", "other"]
 
     # Extract metadata for the datasets
     train_file_name = f'train_augmented_{args.dataset_type}_{args.percentage}.csv'
