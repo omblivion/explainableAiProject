@@ -11,7 +11,7 @@ class MetadataExtractor:
         self.MODEL = "roberta-large-mnli"
         self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL)
         self.models = [
-            AutoModelForSequenceClassification.from_pretrained(self.MODEL).to(f'cuda:{device}')
+            AutoModelForSequenceClassification.from_pretrained(self.MODEL, ignore_mismatched_sizes=True).to(f'cuda:{device}')
             for device in self.devices
         ]
         self.classifiers = [
