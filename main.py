@@ -8,6 +8,7 @@ from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
+from sklearn.metrics import classification_report
 
 if __name__ == "__main__":
     # Set up argument parser for command-line options
@@ -54,6 +55,25 @@ if __name__ == "__main__":
                                                  test_sentiment_file_name, args.debug)
     val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
                                                 args.debug)
+
+    # Compute metrics for the train dataset
+    train_true_labels = original_train_data['target']
+    train_predicted_labels = train_data_with_sentiment['sentiment']
+    print("\nTrain Classification Report:")
+    print(classification_report(train_true_labels, train_predicted_labels, labels=[0, 2, 4]))
+
+    # Compute metrics for the test dataset
+    test_true_labels = original_test_data['target']
+    test_predicted_labels = test_data_with_sentiment['sentiment']
+    print("\nTest Classification Report:")
+    print(classification_report(test_true_labels, test_predicted_labels, labels=[0, 2, 4]))
+
+    # Compute metrics for the validation dataset
+    val_true_labels = original_val_data['target']
+    val_predicted_labels = val_data_with_sentiment['sentiment']
+    print("\nValidation Classification Report:")
+    print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 2, 4]))
+
 
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
@@ -112,11 +132,6 @@ if __name__ == "__main__":
     test_analysis = analyze_disparities(test_subgroups)
     val_analysis = analyze_disparities(val_subgroups)
 
-    # Save the analysis results to CSV files
-    # train_analysis.to_csv('train_sentiment_analysis.csv', index=False)
-    # test_analysis.to_csv('test_sentiment_analysis.csv', index=False)
-    # val_analysis.to_csv('val_sentiment_analysis.csv', index=False)
-
     # Print the analysis results
     print("Train Sentiment Analysis")
     print(train_analysis)
@@ -125,13 +140,3 @@ if __name__ == "__main__":
     print("\nValidation Sentiment Analysis")
     print(val_analysis)
 
-    # Function to analyze disparities in sentiment predictions
-    # # Initialize the sentiment analyzer
-    # sentiment_analyzer = SentimentAnalyzer()
-    #
-    # # Analyze sentiment for the datasets
-    # for dataset in [augmented_train_data, augmented_test_data, augmented_val_data]:
-    #     for index, row in dataset.iterrows():
-    #         sentiment_label = sentiment_analyzer.analyze_sentiment(row['text'])
-    #         sentiment_target = sentiment_analyzer.map_label_to_target(sentiment_label)
-    #         dataset.at[index, 'sentiment'] = sentiment_target
