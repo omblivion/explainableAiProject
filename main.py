@@ -1,14 +1,14 @@
 import argparse
 import os
-import wandb
+
 import pandas as pd
 import torch
 from sklearn.metrics import classification_report
+
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
-
 
 os.environ["WANDB_API_KEY"] = "21cb0c9433eeca19401ee01e9b1bc9e4b6f7a696"
 
@@ -43,7 +43,8 @@ if __name__ == "__main__":
     original_test_data = dataset_loader.test_data
     original_val_data = dataset_loader.val_data
 
-    print(original_train_data.head(5))
+    if args.debug:
+        print(original_train_data.head(5))
 
     # Initialize the sentiment analyzer
     sentiment_analyzer = SentimentAnalyzer()
@@ -67,7 +68,8 @@ if __name__ == "__main__":
                                                  test_sentiment_file_name, args.debug)
     val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
                                                 args.debug)
-
+    if args.debug:
+        print(train_data_with_sentiment.head(5))
 
     # Compute metrics for the train dataset
     train_true_labels = original_train_data['category']
