@@ -155,15 +155,16 @@ if __name__ == "__main__":
 
     print("Train Metrics per Topic")
     print(train_metrics)
+
+    # Identify the least performing topics
+    overall_accuracy = train_metrics['accuracy'].mean()
+    least_performing_topics = train_metrics[train_metrics['accuracy'] < overall_accuracy]['topic'].tolist()
+    print(f"Least performing training topics: {least_performing_topics}")
+
     print("\nTest Metrics per Topic")
     print(test_metrics)
     print("\nValidation Metrics per Topic")
     print(val_metrics)
-
-    # Identify least performing topics
-    overall_accuracy = train_metrics['accuracy'].mean()
-    least_performing_topics = train_metrics[train_metrics['accuracy'] < overall_accuracy]['topic'].tolist()
-    print(f"Least performing topics: {least_performing_topics}")
 
 
     # Function to analyze disparities in sentiment predictions
@@ -228,8 +229,8 @@ if __name__ == "__main__":
         return top_3_topics, bottom_3_topics_below_baseline
 
 
-    topics = get_top_lower_topics(test_metrics, test_analysis, metric='accuracy')
-    print(f"Top 3 (lower score) topics: {topics[0]}")
+    topics = get_top_lower_topics(val_metrics, val_analysis, metric='accuracy')
+    print(f"Top 3 (lower score) validation topics: {topics[0]}")
 
 
     def generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples):
