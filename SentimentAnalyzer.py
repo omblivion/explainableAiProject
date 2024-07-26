@@ -13,6 +13,10 @@ class SentimentAnalyzer:
         self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, ignore_mismatched_sizes=True).to(self.device)
         self.classifier = pipeline("sentiment-analysis", model=self.model, tokenizer=self.tokenizer, device=self.device)
 
+        # Initialize FLAN model for synthetic data generation
+        self.flan_model_name = "google/flan-t5-small"
+        self.flan_tokenizer = AutoTokenizer.from_pretrained(self.flan_model_name)
+        self.flan_model = AutoModelForSeq2SeqLM.from_pretrained(self.flan_model_name).to(self.device)
     def analyze_sentiment(self, text):
         results = self.classifier(text)
         return results[0]['label']
@@ -28,18 +32,15 @@ class SentimentAnalyzer:
         else:
             return None
 
-    # Generate synthetic data using LLMs to be defined
+    # Generate synthetic data using Hugging Face model
     def generate_synthetic_data(self, topic, text, n_samples):
-        openai.api_key = 'YOUR_API_KEY'
         synthetic_data = []
         for _ in range(n_samples):
-            prompt = f"Generate six tweets related to {topic} that expresses sentiment similar to {text}"
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=prompt,
-                max_tokens=60
-            )
-            synthetic_data.append(response.choices[0].text.strip())
+            prompt = f"Generate a tweet related to {topic} that expresses sentiment similar to: '{text}'"
+            inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
+            outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
+            generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
+            synthetic_data.append(generated_text)
         return synthetic_data
 
     def augment_training_data(self, topics, n_samples=100):
@@ -47,7 +48,6 @@ class SentimentAnalyzer:
         augmented_data_with_topics = {'text': [], 'label': [], 'topic': []}
         for topic in topics:
             synthetic_texts = self.generate_synthetic_data(topic, n_samples)
-            # Assuming the sentiment label for generated data
             augmented_data['text'].extend(synthetic_texts)
             augmented_data['label'].extend([1] * len(synthetic_texts))  # Defaulting to neutral
             augmented_data_with_topics['text'].extend(synthetic_texts)
@@ -55,10 +55,10 @@ class SentimentAnalyzer:
             augmented_data_with_topics['topic'].extend([topic] * len(synthetic_texts))
 
         augmented_df = pd.DataFrame(augmented_data)
-        augmented_df_with_topics = pd.DaataFrame(augmented_data_with_topics)
+        augmented_df_with_topics = pd.DataFrame(augmented_data_with_topics)
         return augmented_df, augmented_df_with_topics
 
-    def fine_tune_with_augmented_data(self, topics, n_samples=100, epochs=3, batch_size=16, learning_rate=2e-5):
+    def fine_tune_with_augmented_data(self, topics, n_samples=6, epochs=3, batch_size=16, learning_rate=2e-5):
         augmented_train_data, augmented_train_data_with_topics = self.augment_training_data(topics, n_samples)
         return self.fine_tune(augmented_train_data, epochs, batch_size, learning_rate), augmented_train_data_with_topics
 

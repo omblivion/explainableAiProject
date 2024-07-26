@@ -153,32 +153,55 @@ if __name__ == "__main__":
     print("\nValidation Metrics per Topic")
     print(val_metrics)
 
+    # Identify least performing topics
+    overall_accuracy = train_metrics['accuracy'].mean()
+    least_performing_topics = train_metrics[train_metrics['accuracy'] < overall_accuracy]['topic'].tolist()
+    print(f"Least performing topics: {least_performing_topics}")
+
+    # Generate and augment data for least performing topics
+    synthetic_texts = generate_and_augment_data(sentiment_analyzer, least_performing_topics, original_train_data,
+                                                n_samples=100)
+
+    # Create a new DataFrame for the synthetic data
+    synthetic_df = pd.DataFrame({
+        'text': synthetic_texts,
+        'category': [1] * len(synthetic_texts),  # Assuming neutral category for synthetic data
+        'topic': least_performing_topics * (len(synthetic_texts) // len(least_performing_topics))
+    })
+
+    # Augment original training data with synthetic data
+    augmented_train_data = pd.concat([original_train_data, synthetic_df], ignore_index=True)
+
+    # Fine-tune the sentiment analyzer with the augmented dataset
+    augmented_fine_tuning_results = sentiment_analyzer.fine_tune(augmented_train_data)
+    print(f"Fine-tuning results with augmented data: {augmented_fine_tuning_results}")
+
     # Function to analyze disparities in sentiment predictions
-    def analyze_disparities(subgroups):
-        analysis_results = []
-        for subgroup_name, subgroup_data in subgroups.items():
-            if not subgroup_data.empty:
-                sentiment_counts = subgroup_data['sentiment'].value_counts(normalize=True) * 100
-                analysis_results.append({
-                    'subgroup': subgroup_name,
-                    'total': len(subgroup_data),
-                    'negative': sentiment_counts.get(0, 0),
-                    'neutral': sentiment_counts.get(1, 0),
-                    'positive': sentiment_counts.get(2, 0),
-                })
-        return pd.DataFrame(analysis_results)
-
-
-    # Analyze disparities for the datasets
-    train_analysis = analyze_disparities(train_subgroups)
-    test_analysis = analyze_disparities(test_subgroups)
-    val_analysis = analyze_disparities(val_subgroups)
-
-    # Print the analysis results
-    print("Train Percentage Analysis")
-    print(train_analysis)
-    print("\nTest Percentage Analysis")
-    print(test_analysis)
-    print("\nValidation Percentage Analysis")
-    print(val_analysis)
+    # def analyze_disparities(subgroups):
+    #     analysis_results = []
+    #     for subgroup_name, subgroup_data in subgroups.items():
+    #         if not subgroup_data.empty:
+    #             sentiment_counts = subgroup_data['sentiment'].value_counts(normalize=True) * 100
+    #             analysis_results.append({
+    #                 'subgroup': subgroup_name,
+    #                 'total': len(subgroup_data),
+    #                 'negative': sentiment_counts.get(0, 0),
+    #                 'neutral': sentiment_counts.get(1, 0),
+    #                 'positive': sentiment_counts.get(2, 0),
+    #             })
+    #     return pd.DataFrame(analysis_results)
+    #
+    #
+    # # Analyze disparities for the datasets
+    # train_analysis = analyze_disparities(train_subgroups)
+    # test_analysis = analyze_disparities(test_subgroups)
+    # val_analysis = analyze_disparities(val_subgroups)
+    #
+    # # Print the analysis results
+    # print("Train Percentage Analysis")
+    # print(train_analysis)
+    # print("\nTest Percentage Analysis")
+    # print(test_analysis)
+    # print("\nValidation Percentage Analysis")
+    # print(val_analysis)
 
