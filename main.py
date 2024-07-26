@@ -75,7 +75,6 @@ if __name__ == "__main__":
     val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
                                                 args.debug)
 
-
     # Compute metrics for the train dataset
     train_true_labels = original_train_data['category']
     train_predicted_labels = train_data_with_sentiment['sentiment']
@@ -94,12 +93,12 @@ if __name__ == "__main__":
     print("\nValidation Classification Report:")
     print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 1, 2], zero_division=0))
 
-
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
 
     # Define topic labels
-    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food", "other"]
+    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food",
+                    "other"]
 
     # Define the base path where main.py is located
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -130,6 +129,7 @@ if __name__ == "__main__":
     train_subgroups = create_subgroups(train_data_with_metadata)
     test_subgroups = create_subgroups(test_data_with_metadata)
     val_subgroups = create_subgroups(val_data_with_metadata)
+
 
     # Function to compute metrics for the subgroups
     def compute_metrics(subgroups, true_labels_column='category', pred_labels_column='sentiment'):
@@ -237,12 +237,12 @@ if __name__ == "__main__":
             topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
             topic_samples = topic_data.sample(n_samples, replace=True)
             for index, row in topic_samples.iterrows():
-                synthetic_texts.extend(sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], n_samples))
+                synthetic_texts.extend(sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], 10))
         return synthetic_texts
 
+
     # Generate and augment data for least performing topics
-    synthetic_texts = generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata,
-                                                n_samples=10)
+    synthetic_texts = generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples=10)
     if args.debug:
         print(f"Generated {len(synthetic_texts)} synthetic texts for least performing topics")
         print("Sample synthetic texts:")
