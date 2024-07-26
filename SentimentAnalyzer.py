@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from sklearn.model_selection import train_test_split
 
 class SentimentAnalyzer:
     def __init__(self):
@@ -24,7 +25,7 @@ class SentimentAnalyzer:
         else:
             return None
 
-    # Generate synthetic data using LLMs
+    # Generate synthetic data using LLMs to be defined
     def generate_synthetic_data(self, topic, n_samples):
         openai.api_key = 'YOUR_API_KEY'
         synthetic_data = []
