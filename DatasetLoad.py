@@ -41,9 +41,12 @@ class DatasetLoad:
         if self.dataset_type == 'reddit':
             print("Loading Reddit dataset...")
             data = self.load_data('datasets/Reddit_Data.csv')
+
         elif self.dataset_type == 'tweets':
             print("Loading Twitter dataset...")
             data = self.load_data('datasets/Twitter_Data.csv')
+            # drop the ID column, axis=1
+            data = data.drop('ID', axis=1)
 
         # Ensure the first column is 'text' and the second column is 'category'
         data.columns = ['text', 'category'] + list(data.columns[2:])

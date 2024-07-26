@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     if debug:
         print("Train Data with Sentiment")
-        print(train_data_with_sentiment.head())
+        print(train_data_with_sentiment.head(60))
 
     # Compute metrics for the train dataset
     train_true_labels = original_train_data['category']
