@@ -47,11 +47,14 @@ class DatasetLoad:
             data = self.load_data('datasets/Twitter_Data.csv')
             # drop the ID column, axis=1
             data = data.drop('Id', axis=1)
-            # convert negative, neutral, positive in the column 'Category' to -1, 0, 1
-            data['Category'] = data['Category'].map({'Negative': -1, 'Neutral': 0, 'Positive': 1})
+            # convert category from text to -1, 0, 1
+            data['category'] = data['Category'].map({'Negative': -1, 'Neutral': 0, 'Positive': 1})
+            data = data.drop('Category', axis=1)
+            # rename 'tweet' column to 'text'
+            data = data.rename(columns={'tweet': 'text'})
 
         # Ensure the first column is 'text' and the second column is 'category'
-        data.columns = ['text', 'category'] + list(data.columns[2:])
+        data = data[['text', 'category'] + [col for col in data.columns if col not in ['text', 'category']]]
 
         train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
         self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
