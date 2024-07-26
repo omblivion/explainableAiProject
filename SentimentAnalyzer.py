@@ -48,10 +48,19 @@ class SentimentAnalyzer:
     # Generate synthetic data using the FLAN model
     def generate_synthetic_data(self, topic, text, sentiment, n_samples):
         synthetic_data = []
+        print(f"Generating synthetic data for topic: {topic}, text: {text}, sentiment: {sentiment}")
         for _ in range(n_samples):
-            prompt = f"Generate a tweet related to {topic} that expresses a {sentiment} sentiment and the tweet has to be semantically similar to:  '{text}' "
+            prompt = f"Generate a tweet related to {topic} that expresses a {sentiment} sentiment and the tweet has to be semantically similar to: '{text}' "
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
-            outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
+            # Use top-k sampling and temperature sampling for more diverse outputs
+            outputs = self.flan_model.generate(
+                inputs.input_ids,
+                max_length=60,
+                num_return_sequences=1,
+                do_sample=True,
+                top_k=50,  # Consider top 50 tokens
+                temperature=0.7  # Adjust temperature to control diversity
+            )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
             print(f"Generated Text: {generated_text}")
