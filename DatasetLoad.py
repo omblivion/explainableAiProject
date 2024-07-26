@@ -57,6 +57,7 @@ class DatasetLoad:
             data = data.rename(columns={'Tweet': 'text'})
             # remove the rows of the text column in which the text is "Not Available"
             data = data[data['text'] != 'Not Available']
+            data = data.dropna()
 
         # Ensure the first column is 'text' and the second column is 'category'
         data = data[['text', 'category'] + [col for col in data.columns if col not in ['text', 'category']]]

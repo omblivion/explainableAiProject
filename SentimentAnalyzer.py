@@ -29,11 +29,11 @@ class SentimentAnalyzer:
             return None
 
     # Generate synthetic data using LLMs to be defined
-    def generate_synthetic_data(self, topic, n_samples):
+    def generate_synthetic_data(self, topic, text, n_samples):
         openai.api_key = 'YOUR_API_KEY'
         synthetic_data = []
         for _ in range(n_samples):
-            prompt = f"Generate six tweets related to {topic} that expresses sentiment."
+            prompt = f"Generate six tweets related to {topic} that expresses sentiment similar to {text}"
             response = openai.Completion.create(
                 engine="text-davinci-003",
                 prompt=prompt,
