@@ -3,14 +3,17 @@ import os
 
 import pandas as pd
 import torch
+from sklearn.metrics import classification_report
 
 from DatasetLoad import DatasetLoad
+from DownloadDatasets import download_datasets
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
-from sklearn.metrics import classification_report
 
 if __name__ == "__main__":
+    download_datasets()
+
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
     parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'TODO'],
