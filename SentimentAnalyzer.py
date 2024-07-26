@@ -1,7 +1,9 @@
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, DataCollatorWithPadding, pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
+    DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
+
 from datasets import Dataset
 
 

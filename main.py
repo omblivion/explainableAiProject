@@ -204,7 +204,7 @@ if __name__ == "__main__":
         return metrics_df
 
 
-    def get_top_bottom_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
+    def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
         # Get support for each topic
         support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
 
@@ -228,12 +228,13 @@ if __name__ == "__main__":
         return top_3_topics, bottom_3_topics_below_baseline
 
 
-    topics = get_top_bottom_topics(test_metrics, test_analysis, metric='accuracy')
+    topics = get_top_lower_topics(test_metrics, test_analysis, metric='accuracy')
     print(f"Top 3 (lower score) topics: {topics[0]}")
 
 
     def generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples):
-        # for each topic, select randomly n samples of text from the training data augmented with metadata (containing the topic). Then using the sentences as baseline, generate more that will later be useed to train the model
+        # for each topic, select randomly n samples of text from the training data augmented with metadata (containing the topic).
+        # Then using the sentences as baseline, generate more that will later be used to train the model
         synthetic_texts = []
         for topic in topics:
             topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
