@@ -41,6 +41,7 @@ class DatasetLoad:
         if self.dataset_type == 'reddit':
             print("Loading Reddit dataset...")
             data = self.load_data('datasets/Reddit_Data.csv')
+            data = data.rename(columns={'clean_comment': 'text'})
 
         elif self.dataset_type == 'tweets':
             print("Loading Twitter dataset...")
