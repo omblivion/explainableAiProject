@@ -63,6 +63,7 @@ def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False, batch
             batch_texts = dataset['text'][start:end].tolist()
             # Use the sentiment analyzer to classify the sentiments of the batch of texts
             batch_results = sentiment_analyzer.classifier(batch_texts)
+            print(batch_results)
             # Map the sentiment labels to target values for each result in the batch
             batch_sentiments = [sentiment_analyzer.map_label_to_target(result['label']) for result in batch_results]
             # Extend the sentiments list with the batch sentiments
