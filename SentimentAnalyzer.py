@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, DataCollatorWithPadding, pipeline
 from datasets import Dataset
 
 
@@ -83,6 +83,9 @@ class SentimentAnalyzer:
         train_dataset.set_format("torch")   # Set the format to PyTorch
         test_dataset.set_format("torch")
 
+        # Define the data collator
+        data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
+
         # Define training arguments
         training_args = TrainingArguments(  # Define the training arguments
             output_dir="./results",
@@ -100,6 +103,7 @@ class SentimentAnalyzer:
             args=training_args,
             train_dataset=train_dataset,
             eval_dataset=test_dataset,
+            data_collator=data_collator,
         )
 
         # Fine-tune the model
