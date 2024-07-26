@@ -10,6 +10,8 @@ from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
 from extract_stuff import augment_and_extract_metadata, predict_sentiment
 
+os.environ["WANDB_DISABLED"] = "true"
+
 if __name__ == "__main__":
 
     # Set up argument parser for command-line options
