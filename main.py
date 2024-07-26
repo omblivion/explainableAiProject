@@ -99,7 +99,7 @@ if __name__ == "__main__":
     extractor = MetadataExtractor()
 
     # Define topic labels
-    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food", "other"]
+    topic_labels = ["news", "entertainment", "sports", "technology", "health", "education", "business", "lifestyle", "opinions", "other"]
 
     # Define the base path where main.py is located
     base_path = os.path.dirname(os.path.abspath(__file__))
