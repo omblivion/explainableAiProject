@@ -2,11 +2,10 @@ import random
 
 import pandas as pd
 import torch
+from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
     DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
-
-from datasets import Dataset
 
 
 class SentimentAnalyzer:
@@ -45,11 +44,11 @@ class SentimentAnalyzer:
         for _ in range(n_samples):
             random_seed = random.randint(0, 10000)  # Generate a random seed for each sample
             torch.manual_seed(random_seed)
-            prompt = f"Generate a tweet related to {topic} that is semantically similar to: '{text}'"
+            prompt = f"Generate a detailed and informative tweet about {topic}. The tweet should be semantically similar to: '{text}' and should provide insights or commentary related to {topic}. Make the tweet longer and more engaging."
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
             outputs = self.flan_model.generate(
                 inputs.input_ids,
-                max_length=60,
+                max_length=100,  # Increase max_length for longer outputs
                 num_return_sequences=1,
                 do_sample=True,
                 top_k=50,
