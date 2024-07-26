@@ -13,7 +13,7 @@ from extract_stuff import augment_and_extract_metadata, predict_sentiment
 if __name__ == "__main__":
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
-    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'TODO'],
+    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'reddit'],
                         help='Type of dataset to load')
     parser.add_argument('--debug', type=bool, default=False,
                         help='Enable debug mode to print additional information')
