@@ -1,10 +1,8 @@
 import argparse
 import os
-
 import pandas as pd
 import torch
 from sklearn.metrics import classification_report
-
 from DatasetLoad import DatasetLoad
 from MetadataExtractor import MetadataExtractor
 from SentimentAnalyzer import SentimentAnalyzer
@@ -63,6 +61,7 @@ if __name__ == "__main__":
                                                  test_sentiment_file_name, args.debug)
     val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
                                                 args.debug)
+
 
     if debug:
         print("Train Data with Sentiment")
@@ -123,6 +122,34 @@ if __name__ == "__main__":
     test_subgroups = create_subgroups(test_data_with_metadata)
     val_subgroups = create_subgroups(val_data_with_metadata)
 
+    # Function to compute metrics for the subgroups
+    def compute_metrics(subgroups, true_labels_column='target', pred_labels_column='sentiment'):
+        metrics = []
+        for topic, subgroup in subgroups.items():
+            if not subgroup.empty:
+                true_labels = subgroup[true_labels_column]
+                pred_labels = subgroup[pred_labels_column]
+                report = classification_report(true_labels, pred_labels, output_dict=True, zero_division=0)
+                metrics.append({
+                    'topic': topic,
+                    'accuracy': report['accuracy'],
+                    'precision': report['weighted avg']['precision'],
+                    'recall': report['weighted avg']['recall'],
+                    'f1-score': report['weighted avg']['f1-score']
+                })
+        return pd.DataFrame(metrics)
+
+
+    train_metrics = compute_metrics(train_subgroups)
+    test_metrics = compute_metrics(test_subgroups)
+    val_metrics = compute_metrics(val_subgroups)
+
+    print("Train Metrics per Topic")
+    print(train_metrics)
+    print("\nTest Metrics per Topic")
+    print(test_metrics)
+    print("\nValidation Metrics per Topic")
+    print(val_metrics)
 
     # Function to analyze disparities in sentiment predictions
     def analyze_disparities(subgroups):
@@ -146,10 +173,10 @@ if __name__ == "__main__":
     val_analysis = analyze_disparities(val_subgroups)
 
     # Print the analysis results
-    print("Train Sentiment Analysis")
+    print("Train Percentage Analysis")
     print(train_analysis)
-    print("\nTest Sentiment Analysis")
+    print("\nTest Percentage Analysis")
     print(test_analysis)
-    print("\nValidation Sentiment Analysis")
+    print("\nValidation Percentage Analysis")
     print(val_analysis)
 
