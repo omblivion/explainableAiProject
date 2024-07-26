@@ -33,27 +33,26 @@ class DatasetLoad:
         data = pd.read_csv(full_path, delimiter=',')
         return data
 
+    def load_datasets(self):
+        """
+        Load the datasets based on the dataset type and apply percentage sampling if needed.
+        Ensure the first column is 'text' and the second column is 'category'.
+        """
+        if self.dataset_type == 'reddit':
+            print("Loading Reddit dataset...")
+            data = self.load_data('datasets/Reddit_Data.csv')
+        elif self.dataset_type == 'tweets':
+            print("Loading Twitter dataset...")
+            data = self.load_data('datasets/Twitter_Data.csv')
 
-def load_datasets(self):
-    """
-    Load the datasets based on the dataset type and apply percentage sampling if needed.
-    Ensure the first column is 'text' and the second column is 'category'.
-    """
-    if self.dataset_type == 'reddit':
-        print("Loading Reddit dataset...")
-        data = self.load_data('datasets/Reddit_Data.csv')
-    elif self.dataset_type == 'tweets':
-        print("Loading Twitter dataset...")
-        data = self.load_data('datasets/Twitter_Data.csv')
+        # Ensure the first column is 'text' and the second column is 'category'
+        data.columns = ['text', 'category'] + list(data.columns[2:])
 
-    # Ensure the first column is 'text' and the second column is 'category'
-    data.columns = ['text', 'category'] + list(data.columns[2:])
+        train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
+        self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+        self.train_data = train_data
 
-    train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
-    self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
-    self.train_data = train_data
-
-    if self.percentage < 100.0:
-        self.train_data = self.train_data.sample(frac=self.percentage / 100.0, random_state=42)
-        self.val_data = self.val_data.sample(frac=self.percentage / 100.0, random_state=42)
-        self.test_data = self.test_data.sample(frac=self.percentage / 100.0, random_state=42)
+        if self.percentage < 100.0:
+            self.train_data = self.train_data.sample(frac=self.percentage / 100.0, random_state=42)
+            self.val_data = self.val_data.sample(frac=self.percentage / 100.0, random_state=42)
+            self.test_data = self.test_data.sample(frac=self.percentage / 100.0, random_state=42)

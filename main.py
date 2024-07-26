@@ -34,6 +34,7 @@ if __name__ == "__main__":
     # Initialize dataset loader with the specified type and base path
     base_path = os.path.dirname(os.path.abspath(__file__))
     dataset_loader = DatasetLoad(args.dataset_type, base_path, args.percentage, debug)
+    dataset_loader.load_datasets()
 
     # Load the original train, test, and validation datasets
     original_train_data = dataset_loader.train_data
