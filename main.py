@@ -47,9 +47,12 @@ if __name__ == "__main__":
     sentiment_analyzer = SentimentAnalyzer()
 
     # Extract metadata for the datasets
-    train_sentiment_file_name = f'train_sentiment_{args.dataset_type}_{args.percentage}.csv'
-    test_sentiment_file_name = f'test_sentiment_{args.dataset_type}_{args.percentage}.csv'
-    val_sentiment_file_name = f'val_sentiment_{args.dataset_type}_{args.percentage}.csv'
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+    # Extract metadata for the datasets
+    train_sentiment_file_name = os.path.join(base_path, f'train_sentiment_{args.dataset_type}_{args.percentage}.csv')
+    test_sentiment_file_name = os.path.join(base_path, f'test_sentiment_{args.dataset_type}_{args.percentage}.csv')
+    val_sentiment_file_name = os.path.join(base_path, f'val_sentiment_{args.dataset_type}_{args.percentage}.csv')
 
     # Predict sentiment for the datasets
     train_data_with_sentiment = predict_sentiment(original_train_data.copy(), sentiment_analyzer,
@@ -84,10 +87,13 @@ if __name__ == "__main__":
     # Define topic labels
     topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food", "other"]
 
+    # Define the base path where main.py is located
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
     # Extract metadata for the datasets
-    train_file_name = f'train_augmented_{args.dataset_type}_{args.percentage}.csv'
-    test_file_name = f'test_augmented_{args.dataset_type}_{args.percentage}.csv'
-    val_file_name = f'val_augmented_{args.dataset_type}_{args.percentage}.csv'
+    train_file_name = os.path.join(base_path, f'train_augmented_{args.dataset_type}_{args.percentage}.csv')
+    test_file_name = os.path.join(base_path, f'test_augmented_{args.dataset_type}_{args.percentage}.csv')
+    val_file_name = os.path.join(base_path, f'val_augmented_{args.dataset_type}_{args.percentage}.csv')
 
     train_data_with_metadata = augment_and_extract_metadata(train_data_with_sentiment.copy(), extractor,
                                                             topic_labels, train_file_name, args.debug)
