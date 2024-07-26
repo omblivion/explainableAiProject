@@ -1,8 +1,8 @@
-import pandas as pd
+import numpy as np
 import torch
-from datasets import Dataset
-from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, pipeline
+
+from datasets import Dataset
 
 
 class SentimentAnalyzer:
@@ -28,6 +28,10 @@ class SentimentAnalyzer:
             return None
 
     def fine_tune(self, train_data):
+        # Ensure the training data includes labels
+        if 'label' not in train_data.columns:
+            train_data['label'] = train_data['text'].apply(self.map_label_to_target)
+
         # Tokenize the data
         def tokenize_function(examples):
             return self.tokenizer(examples['text'], padding="max_length", truncation=True)
@@ -52,9 +56,15 @@ class SentimentAnalyzer:
             args=training_args,
             train_dataset=tokenized_train_dataset,
             tokenizer=self.tokenizer,
+            compute_metrics=self.compute_metrics
         )
 
         # Train the model
         trainer.train()
 
         return trainer.evaluate()
+
+    def compute_metrics(self, p):
+        preds = np.argmax(p.predictions, axis=1)
+        accuracy = (preds == p.label_ids).astype(np.float32).mean().item()
+        return {"accuracy": accuracy}
