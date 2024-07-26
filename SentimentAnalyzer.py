@@ -1,9 +1,7 @@
 import torch
-import warnings
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
-# Suppress specific warnings
-warnings.filterwarnings("ignore", message="Some weights of the model checkpoint.*")
+
 class SentimentAnalyzer:
     def __init__(self):
         self.model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
