@@ -74,26 +74,26 @@ if __name__ == "__main__":
     train_true_labels = original_train_data['text']
     train_predicted_labels = train_data_with_sentiment['sentiment']
     print("\nTrain Classification Report:")
-    print(classification_report(train_true_labels, train_predicted_labels, labels=[-1, 0, 1], zero_division=0))
+    print(classification_report(train_true_labels, train_predicted_labels, labels=["-1", "0", "1"], zero_division=0))
 
     # Compute metrics for the test dataset
     test_true_labels = original_test_data['text']
     test_predicted_labels = test_data_with_sentiment['sentiment']
     print("\nTest Classification Report:")
-    print(classification_report(test_true_labels, test_predicted_labels, labels=[-1, 0, 1], zero_division=0))
+    print(classification_report(test_true_labels, test_predicted_labels, labels=["-1", "0", "1"], zero_division=0))
 
     # Compute metrics for the validation dataset
     val_true_labels = original_val_data['text']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
-    print(classification_report(val_true_labels, val_predicted_labels, labels=[-1, 0, 1], zero_division=0))
-
+    print(classification_report(val_true_labels, val_predicted_labels, labels=["-1", "0", "1"], zero_division=0))
 
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
 
     # Define topic labels
-    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food", "other"]
+    topic_labels = ["politics", "entertainment", "sports", "technology", "health", "education", "finance", "food",
+                    "other"]
 
     # Define the base path where main.py is located
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -125,6 +125,7 @@ if __name__ == "__main__":
     test_subgroups = create_subgroups(test_data_with_metadata)
     val_subgroups = create_subgroups(val_data_with_metadata)
 
+
     # Function to compute metrics for the subgroups
     def compute_metrics(subgroups, true_labels_column='target', pred_labels_column='sentiment'):
         metrics = []
@@ -154,6 +155,7 @@ if __name__ == "__main__":
     print("\nValidation Metrics per Topic")
     print(val_metrics)
 
+
     # Function to analyze disparities in sentiment predictions
     def analyze_disparities(subgroups):
         analysis_results = []
@@ -182,4 +184,3 @@ if __name__ == "__main__":
     print(test_analysis)
     print("\nValidation Percentage Analysis")
     print(val_analysis)
-
