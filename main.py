@@ -62,7 +62,7 @@ if __name__ == "__main__":
         # Save the fine-tuned model
         torch.save(sentiment_analyzer.model, model_save_path)
 
-    # Extract metadata for the datasets
+    # Define the file names for the sentiment predictions
     train_sentiment_file_name = os.path.join(base_path, f'train_sentiment_{args.dataset_type}_{args.percentage}.csv')
     test_sentiment_file_name = os.path.join(base_path, f'test_sentiment_{args.dataset_type}_{args.percentage}.csv')
     val_sentiment_file_name = os.path.join(base_path, f'val_sentiment_{args.dataset_type}_{args.percentage}.csv')
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         baseline_accuracy = weighted_metrics_df['accuracy'].mean()
 
         # Sort topics by their weighted metrics
-        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)
+        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False) # Sort by descending
 
         # Get top 3 and bottom 3 topics
         top_3_topics = sorted_metrics.head(3)['topic'].tolist()
@@ -223,41 +223,71 @@ if __name__ == "__main__":
         return top_3_topics, bottom_3_topics_below_baseline
 
 
-    topics = get_top_lower_topics(val_metrics, val_analysis, metric='accuracy')
-    print(f"Top 3 (lower score) validation topics: {topics[0]}")
+    top_3_topics, bottom_3_topics = get_top_lower_topics(val_metrics, val_analysis, metric='accuracy')
+    print(f"Bottom 3 validation topics: {bottom_3_topics }")
+
+    # Randomly select rows from bottom three topics in the training set
+    train_data_bottom_3 = train_data_with_metadata[train_data_with_metadata['topic'].isin(bottom_3_topics)]
+    selected_samples = train_data_bottom_3.sample(n=50, random_state=42)    # Select n samples from the bottom 3 topics
+
+    # Augment the selected samples using the sentiment analyzer
+    generated_df, generated_df_with_metadata = sentiment_analyzer.generate_training_data(
+        selected_samples['topic'].tolist(),
+        selected_samples['text'].tolist(),
+        selected_samples['sentiment'].tolist()
+    )
+
+    # Combine the original and augmented datasets
+    train_original_and_generated_data = pd.concat([original_train_data, generated_df], ignore_index=True)
+    # Save the combined datasets
+    train_original_and_generated_data.to_csv(os.path.join(base_path, 'train_original_and_generated_data.csv'), index=False)
+
+    model_save_path = os.path.join(base_path, f'finetuned_sentiment_model_{args.dataset_type}_{args.percentage}.pt')
+    print("Fine-tuning the sentiment analyzer with the generated+original dataset...")
+    fine_tuning_results_new = sentiment_analyzer.fine_tune(new_training_data)  # TODO NON CE
+    print(f"Fine-tuning results: {fine_tuning_results_new}")
+    # Save the fine-tuned model
+    torch.save(sentiment_analyzer.model, model_save_path)
+
+    # Predict sentiment for the original dataset to see for improvements
+    test_sentiment_file_name_v2 = os.path.join(base_path, f'test_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')
+    val_sentiment_file_name_v2 = os.path.join(base_path, f'val_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')
+    test_data_with_sentiment_v2 = predict_sentiment(original_test_data.copy(), sentiment_analyzer, test_sentiment_file_name_v2, args.debug)
+    val_data_with_sentiment_v2 = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name_v2, args.debug)
+
+    # Compute metrics for the test dataset
+    test_true_labels = original_test_data['category']
+    test_predicted_labels_v2 = test_data_with_sentiment_v2['sentiment']
+    print("\nTest Classification Report:")
+    print(classification_report(test_true_labels, test_predicted_labels_v2, labels=[0, 1, 2], zero_division=0))
+
+    # Compute metrics for the validation dataset
+    val_true_labels = original_val_data['category']
+    val_predicted_labels_v2 = val_data_with_sentiment_v2['sentiment']
+    print("\nValidation Classification Report:")
+    print(classification_report(val_true_labels, val_predicted_labels_v2, labels=[0, 1, 2], zero_division=0))
+
+    test_file_name_v2 = os.path.join(base_path, f'test_augmented_v2_{args.dataset_type}_{args.percentage}.csv')
+    val_file_name_v2 = os.path.join(base_path, f'val_augmented_v2_{args.dataset_type}_{args.percentage}.csv')
+    test_data_with_metadata_v2 = augment_and_extract_metadata(test_data_with_sentiment_v2.copy(), extractor, topic_labels, test_file_name_v2, args.debug)
+    val_data_with_metadata_v2 = augment_and_extract_metadata(val_data_with_sentiment_v2.copy(), extractor, topic_labels, val_file_name_v2, args.debug)
+
+    # Create subgroups for the datasets
+    test_subgroups_v2 = create_subgroups(test_data_with_metadata_v2)
+    val_subgroups_v2 = create_subgroups(val_data_with_metadata_v2)
 
 
-    def generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata, n_samples):
-        # Ensure topics is a list of individual topics
-        if isinstance(topics[0], list):
-            topics = [item for sublist in topics for item in sublist]
+    test_metrics_v2 = compute_metrics(test_subgroups_v2)
+    val_metrics_v2 = compute_metrics(val_subgroups_v2)
 
-        synthetic_texts = []
-        for topic in topics:
-            topic_data = train_data_with_metadata[train_data_with_metadata['topic'] == topic]
-            topic_samples = topic_data.sample(n_samples, replace=True)
-            for index, row in topic_samples.iterrows():
-                synthetic_texts.extend(sentiment_analyzer.generate_synthetic_data(row['topic'], row['text'], n_samples))
-        return synthetic_texts
+    print("\nTest Metrics per Topic")
+    print(test_metrics_v2)
+    print("\nValidation Metrics per Topic")
+    print(val_metrics_v2)
 
-    # Generate and augment data for least performing topics
-    synthetic_texts = generate_and_augment_data(sentiment_analyzer, topics, train_data_with_metadata,
-                                                n_samples=10)
-    if args.debug:
-        print(f"Generated {len(synthetic_texts)} synthetic texts for least performing topics")
-        print("Sample synthetic texts:")
-        print(synthetic_texts[:5])
-
-    # Create a new DataFrame for the synthetic data
-    synthetic_df = pd.DataFrame({
-        'text': synthetic_texts,
-        'category': [1] * len(synthetic_texts),  # Assuming neutral category for synthetic data
-        'topic': least_performing_topics * (len(synthetic_texts) // len(least_performing_topics))
-    })
-
-    # Augment original training data with synthetic data
-    augmented_train_data = pd.concat([original_train_data, synthetic_df], ignore_index=True)
-
-    # Fine-tune the sentiment analyzer with the augmented dataset
-    augmented_fine_tuning_results = sentiment_analyzer.fine_tune(augmented_train_data)
-    print(f"Fine-tuning results with augmented data: {augmented_fine_tuning_results}")
+    test_analysis_v2 = analyze_disparities(test_subgroups_v2)
+    val_analysis_v2 = analyze_disparities(val_subgroups_v2)
+    print("\nTest Percentage Analysis")
+    print(test_analysis_v2)
+    print("\nValidation Percentage Analysis")
+    print(val_analysis_v2)

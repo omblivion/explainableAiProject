@@ -3,7 +3,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
     DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
-
+from sklearn.preprocessing import OneHotEncoder
 from datasets import Dataset
 
 
@@ -34,11 +34,22 @@ class SentimentAnalyzer:
         else:
             return None
 
+    def map_target_to_label(self, target):
+        # Map the target value to the sentiment label
+        if target == 0:
+            return "negative"
+        elif target == 1:
+            return "neutral"
+        elif target == 2:
+            return "positive"
+        else:
+            return None
+
     # Generate synthetic data using the FLAN model
     def generate_synthetic_data(self, topic, text, sentiment, n_samples):
         synthetic_data = []
         for _ in range(n_samples):
-            prompt = f"Generate a tweet related to {topic} that expresses a {sentiment} sentiment similar to: '{text}' "
+            prompt = f"Generate a tweet related to {topic} that expresses a {sentiment} sentiment and the tweet has to be semantically similar to:  '{text}' "
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
             outputs = self.flan_model.generate(inputs.input_ids, max_length=60, num_return_sequences=1)
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -46,29 +57,23 @@ class SentimentAnalyzer:
         return synthetic_data
 
     # Augment the training data with synthetic data
-    def augment_training_data(self, topics, texts, sentiments, n_samples=6):
-        augmented_data = {'text': [], 'label': []}
-        augmented_data_with_topics = {'text': [], 'label': [], 'topic': []}
+    def generate_training_data(self, topics, texts, sentiments, n_samples=6):
+        generated_data = {'text': [], 'label': []}
+        generated_data_with_topic = {'text': [], 'label': [], 'topic': []}
 
         for topic, text, sentiment in zip(topics, texts, sentiments):
-            synthetic_texts = self.generate_synthetic_data(topic, text, sentiment, n_samples)
-            sentiment_label = self.map_label_to_target(sentiment)
-            augmented_data['text'].extend(synthetic_texts)
-            augmented_data['label'].extend([sentiment_label] * len(synthetic_texts))
-            augmented_data_with_topics['text'].extend(synthetic_texts)
-            augmented_data_with_topics['label'].extend([sentiment_label] * len(synthetic_texts))
-            augmented_data_with_topics['topic'].extend([topic] * len(synthetic_texts))
+            sentiment_text = self.map_target_to_label(sentiment)
+            synthetic_texts = self.generate_synthetic_data(topic, text, sentiment_text, n_samples)   # List of synthetic texts
+            generated_data['text'].extend(synthetic_texts)
+            generated_data['category'].extend([sentiment] * len(synthetic_texts))    # append sentiment to texts many times
+            generated_data_with_topic['text'].extend(synthetic_texts)
+            generated_data_with_topic['category'].extend([sentiment] * len(synthetic_texts))
+            generated_data_with_topic['topic'].extend([topic] * len(synthetic_texts))
 
-        augmented_df = pd.DataFrame(augmented_data)
-        augmented_df_with_topics = pd.DataFrame(augmented_data_with_topics)
-        return augmented_df, augmented_df_with_topics
+        generated_df = pd.DataFrame(generated_data)
+        generated_df_with_topics = pd.DataFrame(generated_data_with_topic)
+        return generated_df, generated_df_with_topics
 
-    # Fine-tune the model with augmented data
-    def fine_tune_with_augmented_data(self, topics, texts, sentiments, n_samples=6, epochs=3, batch_size=16,
-                                      learning_rate=2e-5):
-        augmented_train_data, augmented_train_data_with_topics = self.augment_training_data(topics, texts, sentiments,
-                                                                                            n_samples)
-        return self.fine_tune(augmented_train_data, epochs, batch_size, learning_rate), augmented_train_data_with_topics
 
     # Fine-tune the model on a custom dataset
     def fine_tune(self, df, epochs=3, batch_size=16, learning_rate=2e-5):
