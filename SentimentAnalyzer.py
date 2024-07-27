@@ -64,6 +64,7 @@ class SentimentAnalyzer:
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
+            count += 1
             if debug:
                 print(f"Generated Text: {generated_text}")
                 print(f"Percentage of Completion: {count / n_samples * 100:.2f}%, {count} of {n_samples}")
