@@ -197,8 +197,8 @@ if __name__ == "__main__":
     def weighted_metrics(metrics_df, support_df, metric='accuracy'):
         # Join metrics with their respective support counts
         metrics_df = metrics_df.copy()
-        print("Columns before merging with support_df:", metrics_df.columns)
-        print("Support DataFrame columns:", support_df.columns)
+        # print("Columns before merging with support_df:", metrics_df.columns)
+        # print("Support DataFrame columns:", support_df.columns)
         metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
         metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['support']
         return metrics_df
@@ -251,11 +251,15 @@ if __name__ == "__main__":
     train_original_and_generated_data.to_csv(os.path.join(base_path, 'train_original_and_generated_data.csv'), index=False)
 
     model_save_path_v2 = os.path.join(base_path, f'finetuned_sentiment_model_{args.dataset_type}_{args.percentage}.pt')
-    print("Fine-tuning the sentiment analyzer with the generated+original dataset...")
-    fine_tuning_results_new = sentiment_analyzer.fine_tune(train_original_and_generated_data)  # TODO NON CE
-    print(f"Fine-tuning results: {fine_tuning_results_new}")
-    # Save the fine-tuned model
-    torch.save(sentiment_analyzer.model, model_save_path_v2)
+    if os.path.exists(model_save_path_v2):
+        print("Loading the fine-tuned model from disk...")
+        sentiment_analyzer.model = torch.load(model_save_path_v2)
+    else:
+        print("Fine-tuning the sentiment analyzer with the generated+original dataset...")
+        fine_tuning_results_new = sentiment_analyzer.fine_tune(train_original_and_generated_data)  # TODO NON CE
+        print(f"Fine-tuning results: {fine_tuning_results_new}")
+        # Save the fine-tuned model
+        torch.save(sentiment_analyzer.model, model_save_path_v2)
 
     # Predict sentiment for the original dataset to see for improvements
     test_sentiment_file_name_v2 = os.path.join(base_path, f'test_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')
@@ -338,15 +342,14 @@ if __name__ == "__main__":
         plt.legend()
 
         plt.tight_layout()
-        plt.show()
-
+        plt.savefig(f'comparison_{metric}.png')
+        plt.close()
 
     # Plot the comparison for accuracy, precision, recall, and f1-score
     plot_metrics_comparison(test_metrics, test_metrics_v2, metric='accuracy')
     plot_metrics_comparison(test_metrics, test_metrics_v2, metric='precision')
     plot_metrics_comparison(test_metrics, test_metrics_v2, metric='recall')
     plot_metrics_comparison(test_metrics, test_metrics_v2, metric='f1-score')
-
 
     def calculate_overall_accuracy(metrics_df):
         """
@@ -362,7 +365,6 @@ if __name__ == "__main__":
         weighted_accuracy_sum = (metrics_df['accuracy'] * metrics_df['total']).sum()
         overall_accuracy = weighted_accuracy_sum / total_support
         return overall_accuracy
-
 
     def plot_overall_accuracy_comparison(old_metrics, new_metrics, support_old, support_new):
         """
@@ -397,18 +399,13 @@ if __name__ == "__main__":
             plt.text(i, v + 0.01, f"{v:.2f}", ha='center', fontweight='bold')
 
         plt.tight_layout()
-        plt.show()
+        plt.savefig('overall_accuracy_comparison.png')
+        plt.close()
 
 
     # Ensure the 'total' column exists in the metrics DataFrame
     test_analysis_v2 = analyze_disparities(test_subgroups_v2)
     val_analysis_v2 = analyze_disparities(val_subgroups_v2)
-
-    # Print the DataFrame to verify the 'total' column
-    print("\nTest Analysis V2:")
-    print(test_analysis_v2)
-    print("\nValidation Analysis V2:")
-    print(val_analysis_v2)
 
     # Calculate and plot the overall accuracy comparison
     plot_overall_accuracy_comparison(test_metrics, test_metrics_v2, test_analysis, test_analysis_v2)
