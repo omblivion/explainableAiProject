@@ -100,8 +100,6 @@ class SentimentAnalyzer:
             if int(percentage_complete) % 5 == 0:
                 print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {count} of {total}")
 
-
-
         generated_df = pd.DataFrame(generated_data)
         generated_df_with_topics = pd.DataFrame(generated_data_with_topic)
         return generated_df, generated_df_with_topics
@@ -109,30 +107,28 @@ class SentimentAnalyzer:
     # Fine-tune the model on a custom dataset
     def fine_tune(self, df, epochs=3, batch_size=16, learning_rate=2e-5):
         # Preprocess the dataset
-        df = df.rename(columns={"text": "text", "category": "label"})  # Rename the columns
-        df['label'] = df['label'].astype(int)  # Ensure the labels are integers
-        train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)  # Split the dataset
+        df = df.rename(columns={"text": "text", "category": "label"})
+        df['label'] = df['label'].astype(int)
+        train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
 
-        train_dataset = Dataset.from_pandas(train_df)  # Load the dataset
+        train_dataset = Dataset.from_pandas(train_df)
         test_dataset = Dataset.from_pandas(test_df)
 
-        def tokenize_function(examples):  # Tokenize the text
-            return self.tokenizer(examples["text"], padding="max_length", truncation=True)
+        def tokenize_function(examples):
+            return self.tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512)
 
-        train_dataset = train_dataset.map(tokenize_function, batched=True)  # Tokenize the dataset
+        train_dataset = train_dataset.map(tokenize_function, batched=True)
         test_dataset = test_dataset.map(tokenize_function, batched=True)
 
-        train_dataset = train_dataset.remove_columns(["text"])  # Remove the text column after tokenization
+        train_dataset = train_dataset.remove_columns(["text"])
         test_dataset = test_dataset.remove_columns(["text"])
 
-        train_dataset.set_format("torch")  # Set the format to PyTorch
+        train_dataset.set_format("torch")
         test_dataset.set_format("torch")
 
-        # Define the data collator
         data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
 
-        # Define training arguments
-        training_args = TrainingArguments(  #
+        training_args = TrainingArguments(
             output_dir="./results",
             run_name="finetuning_sentiment_classifier",
             eval_strategy="epoch",
@@ -143,7 +139,6 @@ class SentimentAnalyzer:
             weight_decay=0.01,
         )
 
-        # Define the trainer
         trainer = Trainer(
             model=self.model,
             args=training_args,
@@ -152,10 +147,7 @@ class SentimentAnalyzer:
             data_collator=data_collator,
         )
 
-        # Fine-tune the model
         trainer.train()
-
-        # Evaluate the model
         results = trainer.evaluate()
         print(results)
         return results
