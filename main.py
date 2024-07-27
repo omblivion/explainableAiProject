@@ -292,3 +292,95 @@ if __name__ == "__main__":
     print(test_analysis_v2)
     print("\nValidation Percentage Analysis")
     print(val_analysis_v2)
+
+
+    def plot_metrics_comparison(old_metrics, new_metrics, metric='accuracy'):
+        """
+        Plots a comparison of the given metric before and after fine-tuning.
+
+        Parameters:
+        - old_metrics: DataFrame containing the old metrics
+        - new_metrics: DataFrame containing the new metrics
+        - metric: The metric to compare (default is 'accuracy')
+        """
+        # Merge the old and new metrics on the 'topic' column
+        comparison_df = old_metrics.merge(new_metrics, on='topic', suffixes=('_old', '_new'))
+
+        # Sort the DataFrame by the new metric for better visualization
+        comparison_df = comparison_df.sort_values(by=f'{metric}_new', ascending=False)
+
+        # Plot the comparison
+        plt.figure(figsize=(12, 8))
+        bar_width = 0.4
+
+        # Positioning the bars
+        r1 = range(len(comparison_df))
+        r2 = [x + bar_width for x in r1]
+
+        plt.bar(r1, comparison_df[f'{metric}_old'], color='blue', width=bar_width, edgecolor='grey', label='Old')
+        plt.bar(r2, comparison_df[f'{metric}_new'], color='green', width=bar_width, edgecolor='grey', label='New')
+
+        plt.xlabel('Topics', fontweight='bold')
+        plt.ylabel(metric.capitalize(), fontweight='bold')
+        plt.title(f'Comparison of {metric.capitalize()} by Topic', fontweight='bold')
+        plt.xticks([r + bar_width / 2 for r in range(len(comparison_df))], comparison_df['topic'], rotation=90)
+        plt.legend()
+
+        plt.tight_layout()
+        plt.show()
+
+
+    # Plot the comparison for accuracy, precision, recall, and f1-score
+    plot_metrics_comparison(test_metrics, test_metrics_v2, metric='accuracy')
+    plot_metrics_comparison(test_metrics, test_metrics_v2, metric='precision')
+    plot_metrics_comparison(test_metrics, test_metrics_v2, metric='recall')
+    plot_metrics_comparison(test_metrics, test_metrics_v2, metric='f1-score')
+
+
+    def calculate_overall_accuracy(metrics_df):
+        """
+        Calculate the overall accuracy from the metrics DataFrame.
+
+        Parameters:
+        - metrics_df: DataFrame containing the metrics
+
+        Returns:
+        - overall_accuracy: The overall accuracy
+        """
+        total_support = metrics_df['total'].sum()
+        weighted_accuracy_sum = (metrics_df['accuracy'] * metrics_df['total']).sum()
+        overall_accuracy = weighted_accuracy_sum / total_support
+        return overall_accuracy
+
+
+    def plot_overall_accuracy_comparison(old_metrics, new_metrics):
+        """
+        Plot the overall accuracy comparison before and after fine-tuning.
+
+        Parameters:
+        - old_metrics: DataFrame containing the old metrics
+        - new_metrics: DataFrame containing the new metrics
+        """
+        overall_accuracy_old = calculate_overall_accuracy(old_metrics)
+        overall_accuracy_new = calculate_overall_accuracy(new_metrics)
+
+        accuracies = [overall_accuracy_old, overall_accuracy_new]
+        labels = ['Old Model', 'New Model']
+
+        plt.figure(figsize=(8, 6))
+        plt.bar(labels, accuracies, color=['blue', 'green'], edgecolor='grey')
+
+        plt.xlabel('Model', fontweight='bold')
+        plt.ylabel('Overall Accuracy', fontweight='bold')
+        plt.title('Overall Accuracy Comparison', fontweight='bold')
+        plt.ylim(0, 1)  # Assuming accuracy is between 0 and 1
+
+        for i, v in enumerate(accuracies):
+            plt.text(i, v + 0.01, f"{v:.2f}", ha='center', fontweight='bold')
+
+        plt.tight_layout()
+        plt.show()
+
+
+    # Calculate and plot the overall accuracy comparison
+    plot_overall_accuracy_comparison(test_metrics, test_metrics_v2)
