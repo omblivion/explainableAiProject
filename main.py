@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
-    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'TODO'],
+    parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'reddit'],
                         help='Type of dataset to load')
     parser.add_argument('--debug', type=bool, default=False,
                         help='Enable debug mode to print even more additional information')
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Initialize dataset loader with the specified type and base path
     base_path = os.path.dirname(os.path.abspath(__file__))
-    dataset_loader = DatasetLoad('tweets', base_path, args.percentage)
+    dataset_loader = DatasetLoad(args.dataset_type, base_path, args.percentage)
     dataset_loader.load_datasets()
 
     # Load the original train, test, and validation datasets
