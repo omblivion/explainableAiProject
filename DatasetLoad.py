@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -42,7 +43,7 @@ class DatasetLoad:
             data = self.load_data('datasets/Reddit_Data.csv')
             data = data.rename(columns={'clean_comment': 'text'})
             # truncate the text in the text column with over 512 characters
-            data['text'] = data['text'].str.slice(0, 512)
+            data['text'] = data['text'].str.slice(0, 256)
             data['category'] = data['category'].map({-1: 0, 0: 1, 1: 2})
             data = data.dropna()
 
