@@ -199,7 +199,7 @@ if __name__ == "__main__":
         metrics_df = metrics_df.copy()
         print("Columns before merging with support_df:", metrics_df.columns)
         print("Support DataFrame columns:", support_df.columns)
-        metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
+        metrics_df = metrics_df.merge(support_df, left_on='support', right_on='subgroup')
         metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['total']
         return metrics_df
 
