@@ -235,7 +235,8 @@ if __name__ == "__main__":
     generated_df, generated_df_with_metadata = sentiment_analyzer.generate_training_data(
         selected_samples['topic'].tolist(),
         selected_samples['text'].tolist(),
-        selected_samples['sentiment'].tolist()
+        selected_samples['sentiment'].tolist(),
+        debug=args.debug
     )
 
     # Combine the original and augmented datasets

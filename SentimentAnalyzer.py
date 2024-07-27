@@ -46,7 +46,7 @@ class SentimentAnalyzer:
             return None
 
     # Generate synthetic data using the FLAN model
-    def generate_synthetic_data(self, topic, text, sentiment, n_samples):
+    def generate_synthetic_data(self, topic, text, sentiment, n_samples, debug=False):
         synthetic_data = []
         #print(f"Generating synthetic data for topic: {topic}, text: {text}, sentiment: {sentiment}")
         for _ in range(n_samples):
@@ -58,12 +58,14 @@ class SentimentAnalyzer:
                 max_length=60,
                 num_return_sequences=1,
                 do_sample=True,
-                top_k=50,  # Consider top 50 tokens
-                temperature=0.5  # Adjust temperature to control diversity
+                top_k=50,
+                temperature=0.5
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
-            #print(f"Generated Text: {generated_text}")
+            if debug:
+                print(f"Generated Text: {generated_text}")
+                print(f"Percentage of Completion: {count / n_samples * 100:.2f}%, {count} of {n_samples}")
         return synthetic_data
 
     # Augment the training data with synthetic data
