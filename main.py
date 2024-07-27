@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
 
     bottom_3_topics, top_3_topics = get_top_lower_topics(val_metrics, val_analysis, val_accuracy, metric='accuracy')
-    print(f"Bottom 3 validation topics: {bottom_3_topics }")
+    print(f"Bottom 3 validation topics: {bottom_3_topics}")
 
     print("Augmenting the training dataset with synthetic data...")
     # Randomly select rows from bottom three topics in the training set
