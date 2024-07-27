@@ -25,6 +25,10 @@ class SentimentAnalyzer:
         results = self.classifier(text)
         return results[0]['label']
 
+    def truncate_text(self, text):
+        encoded = self.tokenizer.encode(text, add_special_tokens=True, max_length=512, truncation=True)
+        return self.tokenizer.decode(encoded)
+
     def map_label_to_target(self, label):
         # Map the sentiment label to the target value
         if label == "negative" or label == "Negative":

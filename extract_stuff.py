@@ -61,12 +61,15 @@ def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False, batch
             end = min(start + batch_size, total_rows)
             # Extract a batch of texts from the dataset
             batch_texts = dataset['text'][start:end].tolist()
-            # Use the sentiment analyzer to classify the sentiments of the batch of texts
-            batch_results = sentiment_analyzer.classifier(batch_texts)
-            # Map the sentiment labels to target values for each result in the batch
+
+            # Truncate texts to the model's maximum token length
+            truncated_batch_texts = [sentiment_analyzer.truncate_text(text) for text in batch_texts]
+
+            batch_results = sentiment_analyzer.classifier(truncated_batch_texts, truncation=True, padding=True,
+                                                          max_length=512)
             batch_sentiments = [sentiment_analyzer.map_label_to_target(result['label']) for result in batch_results]
-            # Extend the sentiments list with the batch sentiments
             sentiments.extend(batch_sentiments)
+
             # Calculate the percentage of completion
             percentage_complete = (end / total_rows) * 100
             if debug:
