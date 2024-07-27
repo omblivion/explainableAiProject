@@ -80,6 +80,8 @@ class SentimentAnalyzer:
         generated_data = {'text': [], 'category': []}
         generated_data_with_topic = {'text': [], 'category': [], 'topic': []}
 
+        count = 0
+        total = len(texts)
         for topic, text, sentiment in zip(topics, texts, sentiments):
             sentiment_text = self.map_target_to_label(sentiment)
             synthetic_texts = self.generate_synthetic_data(topic, text, sentiment_text, n_samples,
@@ -90,8 +92,15 @@ class SentimentAnalyzer:
             generated_data_with_topic['text'].extend(synthetic_texts)
             generated_data_with_topic['category'].extend([sentiment] * len(synthetic_texts))
             generated_data_with_topic['topic'].extend([topic] * len(synthetic_texts))
+            count += 1
             if debug:
                 print(f"DEBUG - Generated synthetic data for topic: {topic}, text: {text}, sentiment: {sentiment_text}")
+            # Print percentage of completion of total texts
+            percentage_complete = count / total * 100
+            if int(percentage_complete) % 5 == 0:
+                print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {count} of {total}")
+
+
 
         generated_df = pd.DataFrame(generated_data)
         generated_df_with_topics = pd.DataFrame(generated_data_with_topic)
