@@ -200,7 +200,7 @@ if __name__ == "__main__":
         # Join metrics with their respective support counts
         metrics_df = metrics_df.copy()
         metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
-        metrics_df['weighted_metric'] = (metrics_df[metric] - accuracy) * metrics_df['support']
+        metrics_df['weighted_metric'] = (accuracy - metrics_df[metric]) * metrics_df['support']
         return metrics_df
 
 
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending, so the first 3 are the most disadvantaged
 
         # Get top 3 and bottom 3 topics
-        bottom_3_topics = sorted_metrics.head(3)['topic'].tolist()
+        bottom_3_topics = sorted_metrics[sorted_metrics['weighted_metric'] > 0].head(3)['topic'].tolist()
         top_3_topics = sorted_metrics.tail(3)['topic'].tolist()
 
         return bottom_3_topics, top_3_topics
