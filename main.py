@@ -202,7 +202,6 @@ if __name__ == "__main__":
         metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['support']
         return metrics_df
 
-
     def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
         # Get support for each topic
         support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
@@ -390,6 +389,16 @@ if __name__ == "__main__":
         plt.tight_layout()
         plt.show()
 
+
+    # Ensure the 'total' column exists in the metrics DataFrame
+    test_analysis_v2 = analyze_disparities(test_subgroups_v2)
+    val_analysis_v2 = analyze_disparities(val_subgroups_v2)
+
+    # Print the DataFrame to verify the 'total' column
+    print("\nTest Analysis V2:")
+    print(test_analysis_v2)
+    print("\nValidation Analysis V2:")
+    print(val_analysis_v2)
 
     # Calculate and plot the overall accuracy comparison
     plot_overall_accuracy_comparison(test_metrics, test_metrics_v2)
