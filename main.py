@@ -239,7 +239,7 @@ if __name__ == "__main__":
     )
 
     # Combine the original and augmented datasets
-    train_original_and_generated_data = pd.concat([original_train_data, generated_df], ignore_index=True)
+    train_original_and_generated_data = generated_df
     # Save the combined datasets
     train_original_and_generated_data.to_csv(os.path.join(base_path, 'train_original_and_generated_data.csv'), index=False)
 
