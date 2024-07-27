@@ -14,7 +14,6 @@ from extract_stuff import augment_and_extract_metadata, predict_sentiment
 os.environ["WANDB_API_KEY"] = "21cb0c9433eeca19401ee01e9b1bc9e4b6f7a696"
 
 if __name__ == "__main__":
-
     # Set up argument parser for command-line options
     parser = argparse.ArgumentParser(description='Load dataset')
     parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'reddit'],
@@ -25,12 +24,15 @@ if __name__ == "__main__":
                         help='Enable debug mode to print additional information')
     parser.add_argument('--percentage', type=float, default=100.0,
                         help='Percentage of the dataset to use (e.g., 0.1 for 0.1%)')
+    parser.add_argument('--switch-classifier', type=bool, default=False,
+                        help='Switch to the opposite classifier')
 
     # Parse command-line arguments
     args = parser.parse_args()
     print("Debugging is set to: ", args.debug)
     print("Deep Debugging is set to: ", args.deep_debug)
     print("Percentage is set to: ", args.percentage)
+    print("Switch Classifier is set to: ", args.switch_classifier)
 
     # Print Torch availability and device information
     print("Torch is available: ", torch.cuda.is_available())
@@ -55,16 +57,26 @@ if __name__ == "__main__":
     # Extract metadata for the datasets
     base_path = os.path.dirname(os.path.abspath(__file__))
     model_save_path = os.path.join(base_path, f'sentiment_model_{args.dataset_type}_{args.percentage}.pt')
-    # Check if a saved model exists
-    if os.path.exists(model_save_path):
-        print("Loading the fine-tuned model from disk...")
-        sentiment_analyzer.model = torch.load(model_save_path)
+
+    # Determine the opposite dataset type
+    opposite_dataset_type = 'tweets' if args.dataset_type == 'reddit' else 'reddit'
+    opposite_model_save_path = os.path.join(base_path, f'sentiment_model_{opposite_dataset_type}_{args.percentage}.pt')
+
+    # Check if the switch-classifier flag is true and if the opposite model exists
+    if args.switch_classifier and os.path.exists(opposite_model_save_path):
+        print("Loading the fine-tuned model of the opposite dataset type from disk...")
+        sentiment_analyzer.model = torch.load(opposite_model_save_path)
     else:
-        print("Fine-tuning the sentiment analyzer with the original dataset...")
-        fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
-        print(f"Fine-tuning results: {fine_tuning_results}")
-        # Save the fine-tuned model
-        torch.save(sentiment_analyzer.model, model_save_path)
+        # Check if a saved model exists
+        if os.path.exists(model_save_path):
+            print("Loading the fine-tuned model from disk...")
+            sentiment_analyzer.model = torch.load(model_save_path)
+        else:
+            print("Fine-tuning the sentiment analyzer with the original dataset...")
+            fine_tuning_results = sentiment_analyzer.fine_tune(original_train_data)
+            print(f"Fine-tuning results: {fine_tuning_results}")
+            # Save the fine-tuned model
+            torch.save(sentiment_analyzer.model, model_save_path)
 
     # Define the file names for the sentiment predictions
     train_sentiment_file_name = os.path.join(base_path, f'train_sentiment_{args.dataset_type}_{args.percentage}.csv')
