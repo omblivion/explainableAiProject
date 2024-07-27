@@ -60,7 +60,7 @@ class SentimentAnalyzer:
                 num_return_sequences=1,
                 do_sample=True,
                 top_k=50,
-                temperature=0.5
+                temperature=0.9
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
