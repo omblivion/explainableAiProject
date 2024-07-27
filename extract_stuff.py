@@ -28,9 +28,9 @@ def augment_and_extract_metadata(dataset, extractor, topic_labels, file_path, de
             # If debug mode is enabled, print debug information
             percentage_complete = ((count + 1) / total_rows) * 100
             if debug:
-                print(f"Text: {row['text']}")
-                print(f"Generated Metadata: Topic - {topic}")
-                print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
+                print(f"DEBUG - Text: {row['text']}")
+                print(f"DEBUG - Generated Metadata: Topic - {topic}")
+                print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
             if percentage_complete % 5 == 0:
                 print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
@@ -70,8 +70,8 @@ def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False, batch
             # Calculate the percentage of completion
             percentage_complete = ((end) / total_rows) * 100
             if debug:
-                print(f"Processed batch {start // batch_size + 1}: {start} to {end}")
-                print(f"Percentage of Completion: {percentage_complete:.2f}%, {end} of {total_rows}")
+                print(f"DEBUG - Processed batch {start // batch_size + 1}: {start} to {end}")
+                print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {end} of {total_rows}")
             if percentage_complete % 5 == 0:
                 print(f"Percentage of Completion: {percentage_complete:.2f}%")
 

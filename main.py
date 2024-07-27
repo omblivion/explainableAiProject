@@ -1,5 +1,6 @@
 import argparse
 import os
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
@@ -19,6 +20,8 @@ if __name__ == "__main__":
     parser.add_argument('--dataset_type', type=str, default='tweets', choices=['tweets', 'TODO'],
                         help='Type of dataset to load')
     parser.add_argument('--debug', type=bool, default=False,
+                        help='Enable debug mode to print even more additional information')
+    parser.add_argument('--deep_debug', type=bool, default=False,
                         help='Enable debug mode to print additional information')
     parser.add_argument('--percentage', type=float, default=100.0,
                         help='Percentage of the dataset to use (e.g., 0.1 for 0.1%)')
@@ -26,6 +29,7 @@ if __name__ == "__main__":
     # Parse command-line arguments
     args = parser.parse_args()
     print("Debugging is set to: ", args.debug)
+    print("Deep Debugging is set to: ", args.deep_debug)
     print("Percentage is set to: ", args.percentage)
 
     # Print Torch availability and device information
@@ -69,11 +73,11 @@ if __name__ == "__main__":
 
     # Predict sentiment for the datasets
     train_data_with_sentiment = predict_sentiment(original_train_data.copy(), sentiment_analyzer,
-                                                  train_sentiment_file_name, args.debug)
+                                                  train_sentiment_file_name, args.deep_debug)
     test_data_with_sentiment = predict_sentiment(original_test_data.copy(), sentiment_analyzer,
-                                                 test_sentiment_file_name, args.debug)
+                                                 test_sentiment_file_name, args.deep_debug)
     val_data_with_sentiment = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name,
-                                                args.debug)
+                                                args.deep_debug)
 
 
     # Compute metrics for the train dataset
@@ -110,11 +114,11 @@ if __name__ == "__main__":
     val_file_name = os.path.join(base_path, f'val_augmented_{args.dataset_type}_{args.percentage}.csv')
 
     train_data_with_metadata = augment_and_extract_metadata(train_data_with_sentiment.copy(), extractor,
-                                                            topic_labels, train_file_name, args.debug)
+                                                            topic_labels, train_file_name, args.deep_debug)
     test_data_with_metadata = augment_and_extract_metadata(test_data_with_sentiment.copy(), extractor,
-                                                           topic_labels, test_file_name, args.debug)
+                                                           topic_labels, test_file_name, args.deep_debug)
     val_data_with_metadata = augment_and_extract_metadata(val_data_with_sentiment.copy(), extractor,
-                                                          topic_labels, val_file_name, args.debug)
+                                                          topic_labels, val_file_name, args.deep_debug)
 
 
     # Function to create subgroups based on metadata
@@ -254,8 +258,10 @@ if __name__ == "__main__":
     # Predict sentiment for the original dataset to see for improvements
     test_sentiment_file_name_v2 = os.path.join(base_path, f'test_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')
     val_sentiment_file_name_v2 = os.path.join(base_path, f'val_sentiment_v2_{args.dataset_type}_{args.percentage}.csv')
-    test_data_with_sentiment_v2 = predict_sentiment(original_test_data.copy(), sentiment_analyzer, test_sentiment_file_name_v2, args.debug)
-    val_data_with_sentiment_v2 = predict_sentiment(original_val_data.copy(), sentiment_analyzer, val_sentiment_file_name_v2, args.debug)
+    test_data_with_sentiment_v2 = predict_sentiment(original_test_data.copy(), sentiment_analyzer,
+                                                    test_sentiment_file_name_v2, args.deep_debug)
+    val_data_with_sentiment_v2 = predict_sentiment(original_val_data.copy(), sentiment_analyzer,
+                                                   val_sentiment_file_name_v2, args.deep_debug)
 
     # Compute metrics for the test dataset
     test_true_labels = original_test_data['category']
@@ -271,8 +277,10 @@ if __name__ == "__main__":
 
     test_file_name_v2 = os.path.join(base_path, f'test_augmented_v2_{args.dataset_type}_{args.percentage}.csv')
     val_file_name_v2 = os.path.join(base_path, f'val_augmented_v2_{args.dataset_type}_{args.percentage}.csv')
-    test_data_with_metadata_v2 = augment_and_extract_metadata(test_data_with_sentiment_v2.copy(), extractor, topic_labels, test_file_name_v2, args.debug)
-    val_data_with_metadata_v2 = augment_and_extract_metadata(val_data_with_sentiment_v2.copy(), extractor, topic_labels, val_file_name_v2, args.debug)
+    test_data_with_metadata_v2 = augment_and_extract_metadata(test_data_with_sentiment_v2.copy(), extractor,
+                                                              topic_labels, test_file_name_v2, args.deep_debug)
+    val_data_with_metadata_v2 = augment_and_extract_metadata(val_data_with_sentiment_v2.copy(), extractor, topic_labels,
+                                                             val_file_name_v2, args.deep_debug)
 
     # Create subgroups for the datasets
     test_subgroups_v2 = create_subgroups(test_data_with_metadata_v2)
