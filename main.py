@@ -261,7 +261,7 @@ if __name__ == "__main__":
         sentiment_analyzer.model = torch.load(model_save_path_v2)
     else:
         print("Fine-tuning the sentiment analyzer with the generated+original dataset...")
-        fine_tuning_results_new = sentiment_analyzer.fine_tune(train_original_and_generated_data)  # TODO NON CE
+        fine_tuning_results_new = sentiment_analyzer.fine_tune(train_original_and_generated_data)
         print(f"Fine-tuning results: {fine_tuning_results_new}")
         # Save the fine-tuned model
         torch.save(sentiment_analyzer.model, model_save_path_v2)
