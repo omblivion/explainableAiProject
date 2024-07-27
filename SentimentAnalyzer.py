@@ -3,7 +3,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, \
     DataCollatorWithPadding, pipeline, AutoModelForSeq2SeqLM
-from sklearn.preprocessing import OneHotEncoder
+
 from datasets import Dataset
 
 
@@ -49,6 +49,7 @@ class SentimentAnalyzer:
     def generate_synthetic_data(self, topic, text, sentiment, n_samples, debug=False):
         synthetic_data = []
         #print(f"Generating synthetic data for topic: {topic}, text: {text}, sentiment: {sentiment}")
+        count = 0
         for _ in range(n_samples):
             prompt = f"Generate a tweet related to {topic} that expresses a {sentiment} sentiment and the tweet has to be semantically similar to: '{text}' "
             inputs = self.flan_tokenizer(prompt, return_tensors="pt").to(self.device)
