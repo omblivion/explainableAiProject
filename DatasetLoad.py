@@ -63,8 +63,8 @@ class DatasetLoad:
         # Ensure the first column is 'text' and the second column is 'category'
         data = data[['text', 'category'] + [col for col in data.columns if col not in ['text', 'category']]]
 
-        train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42, stratify=data['category'])
-        self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42, stratify=temp_data['category'])
+        train_data, temp_data = train_test_split(data, test_size=0.3, random_state=42)
+        self.val_data, self.test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
         self.train_data = train_data
 
         if self.percentage < 100.0:
