@@ -46,11 +46,37 @@ To run the program, use the following command:
 python main.py --dataset_type <dataset_type> --debug <debug_mode> --percentage <percentage>
 ```
 
-Arguments
+## Arguments
 
-    --dataset_type: Type of the dataset to load. Options are emotion or sarcasm. Default is emotion.
-    --debug: Enable debug mode to print additional information. Options are True or False. Default is False.
-    --percentage: Percentage of the dataset to use. For example, use 0.1 for 10% of the dataset. Default is 100.0.
+### --dataset_type
+
+- **Description**: Type of the dataset to load.
+- **Options**: `tweets`, `reddit`
+- **Default**: `tweets`
+
+### --debug
+
+- **Description**: Enable debug mode to print even more additional information.
+- **Options**: `True`, `False`
+- **Default**: `False`
+
+### --deep_debug
+
+- **Description**: Enable deep debug mode to print additional information.
+- **Options**: `True`, `False`
+- **Default**: `False`
+
+### --percentage
+
+- **Description**: Percentage of the dataset to use. For example, use `0.1` for `10%` of the dataset.
+- **Type**: `float`
+- **Default**: `100.0`
+
+### --switch-classifier
+
+- **Description**: Switch to the opposite classifier.
+- **Options**: `True`, `False`
+- **Default**: `False`
 
 ## References
 
