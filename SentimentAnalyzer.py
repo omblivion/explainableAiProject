@@ -28,8 +28,12 @@ class SentimentAnalyzer:
     def truncate_text(self, text):
         tokens = self.tokenizer.tokenize(text)
         if len(tokens) > self.tokenizer.model_max_length:
-            tokens = tokens[:self.tokenizer.model_max_length - 2]  # Adjusting for special tokens
+            tokens = tokens[:self.tokenizer.model_max_length - 2]
         return self.tokenizer.convert_tokens_to_string(tokens)
+
+    def truncate_texts(self, texts):
+        return [self.tokenizer(text, truncation=True, max_length=self.tokenizer.model_max_length,
+                               return_tensors="pt").input_ids[0] for text in texts]
 
     def map_label_to_target(self, label):
         # Map the sentiment label to the target value
