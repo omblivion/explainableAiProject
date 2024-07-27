@@ -43,7 +43,8 @@ class DatasetLoad:
             data = data.rename(columns={'clean_comment': 'text'})
             # truncate the text in the text column with over 512 characters
             data['text'] = data['text'].str.slice(0, 512)
-
+            data['category'] = data['category'].map({-1: 0, 0: 1, 1: 2})
+            data = data.dropna()
 
         elif self.dataset_type == 'tweets':
             print("Loading Twitter dataset...")
@@ -57,6 +58,7 @@ class DatasetLoad:
             data = data.rename(columns={'Tweet': 'text'})
             # remove the rows of the text column in which the text is "Not Available"
             data = data[data['text'] != 'Not Available']
+            data = data.dropna()
 
         # Ensure the first column is 'text' and the second column is 'category'
         data = data[['text', 'category'] + [col for col in data.columns if col not in ['text', 'category']]]
