@@ -96,8 +96,10 @@ if __name__ == "__main__":
     val_true_labels = original_val_data['category']
     val_predicted_labels = val_data_with_sentiment['sentiment']
     print("\nValidation Classification Report:")
+    val_report = classification_report(val_true_labels, val_predicted_labels, labels=[0, 1, 2], zero_division=0,
+                                       output_dict=True)
     print(classification_report(val_true_labels, val_predicted_labels, labels=[0, 1, 2], zero_division=0))
-
+    val_accuracy = val_report['accuracy']
 
     # Initialize the metadata extractor
     extractor = MetadataExtractor()
@@ -194,42 +196,33 @@ if __name__ == "__main__":
     print(val_analysis)
 
 
-    def weighted_metrics(metrics_df, support_df, metric='accuracy'):
+    def weighted_metrics(metrics_df, support_df, accuracy, metric='accuracy'):
         # Join metrics with their respective support counts
         metrics_df = metrics_df.copy()
-        # print("Columns before merging with support_df:", metrics_df.columns)
-        # print("Support DataFrame columns:", support_df.columns)
         metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
-        metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['support']
+        metrics_df['weighted_metric'] = (metrics_df[metric] - accuracy) * metrics_df['support']
         return metrics_df
 
 
     # Function to get top and bottom topics based on weighted metrics
-    def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
+    def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, accuracy=val_accuracy, metric='accuracy'):
         # Get support for each topic
         support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
 
         # Compute weighted metrics
-        weighted_metrics_df = weighted_metrics(test_metrics_df, support_df, metric)
-
-        # Compute baseline accuracy
-        baseline_accuracy = weighted_metrics_df['accuracy'].mean()
+        weighted_metrics_df = weighted_metrics(test_metrics_df, support_df, accuracy, metric)
 
         # Sort topics by their weighted metrics
-        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending
+        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending, so the first 3 are the most disadvantaged
 
         # Get top 3 and bottom 3 topics
-        top_3_topics = sorted_metrics.head(3)['topic'].tolist()
-        bottom_3_topics = sorted_metrics.tail(3)['topic'].tolist()
+        bottom_3_topics = sorted_metrics.head(3)['topic'].tolist()
+        top_3_topics = sorted_metrics.tail(3)['topic'].tolist()
 
-        # Adjust for baseline accuracy
-        bottom_3_topics_below_baseline = sorted_metrics[sorted_metrics['accuracy'] < baseline_accuracy].tail(3)[
-            'topic'].tolist()
-
-        return top_3_topics, bottom_3_topics_below_baseline
+        return bottom_3_topics, top_3_topics
 
 
-    top_3_topics, bottom_3_topics = get_top_lower_topics(val_metrics, val_analysis, metric='accuracy')
+    bottom_3_topics, top_3_topics = get_top_lower_topics(val_metrics, val_analysis, val_accuracy, metric='accuracy')
     print(f"Bottom 3 validation topics: {bottom_3_topics }")
 
     print("Augmenting the training dataset with synthetic data...")
@@ -393,7 +386,7 @@ if __name__ == "__main__":
         plt.xlabel('Model', fontweight='bold')
         plt.ylabel('Overall Accuracy', fontweight='bold')
         plt.title('Overall Accuracy Comparison', fontweight='bold')
-        plt.ylim(0, 1)  # Assuming accuracy is between 0 and 1
+        plt.ylim(0, 1)
 
         for i, v in enumerate(accuracies):
             plt.text(i, v + 0.01, f"{v:.2f}", ha='center', fontweight='bold')
@@ -401,11 +394,6 @@ if __name__ == "__main__":
         plt.tight_layout()
         plt.savefig('overall_accuracy_comparison.png')
         plt.close()
-
-
-    # Ensure the 'total' column exists in the metrics DataFrame
-    test_analysis_v2 = analyze_disparities(test_subgroups_v2)
-    val_analysis_v2 = analyze_disparities(val_subgroups_v2)
 
     # Calculate and plot the overall accuracy comparison
     plot_overall_accuracy_comparison(test_metrics, test_metrics_v2, test_analysis, test_analysis_v2)

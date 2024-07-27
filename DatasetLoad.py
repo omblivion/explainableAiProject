@@ -43,7 +43,8 @@ class DatasetLoad:
             data = data.rename(columns={'clean_comment': 'text'})
             # truncate the text in the text column with over 512 characters
             data['text'] = data['text'].str.slice(0, 512)
-
+            data['category'] = data['category'].map({-1: 0, 0: 1, 1: 2})
+            data = data.dropna()
 
         elif self.dataset_type == 'tweets':
             print("Loading Twitter dataset...")

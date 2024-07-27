@@ -132,7 +132,7 @@ class SentimentAnalyzer:
         data_collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
 
         # Define training arguments
-        training_args = TrainingArguments(  # Define the training arguments
+        training_args = TrainingArguments(  #
             output_dir="./results",
             run_name="finetuning_sentiment_classifier",
             eval_strategy="epoch",
