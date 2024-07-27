@@ -180,7 +180,6 @@ if __name__ == "__main__":
                 })
         return pd.DataFrame(analysis_results)
 
-
     # Analyze disparities for the datasets
     train_analysis = analyze_disparities(train_subgroups)
     test_analysis = analyze_disparities(test_subgroups)
@@ -198,11 +197,14 @@ if __name__ == "__main__":
     def weighted_metrics(metrics_df, support_df, metric='accuracy'):
         # Join metrics with their respective support counts
         metrics_df = metrics_df.copy()
+        print("Columns before merging with support_df:", metrics_df.columns)
+        print("Support DataFrame columns:", support_df.columns)
         metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
         metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['total']
         return metrics_df
 
 
+    # Function to get top and bottom topics based on weighted metrics
     def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
         # Get support for each topic
         support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
@@ -214,7 +216,7 @@ if __name__ == "__main__":
         baseline_accuracy = weighted_metrics_df['accuracy'].mean()
 
         # Sort topics by their weighted metrics
-        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False) # Sort by descending
+        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending
 
         # Get top 3 and bottom 3 topics
         top_3_topics = sorted_metrics.head(3)['topic'].tolist()
