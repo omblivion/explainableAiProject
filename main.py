@@ -199,8 +199,9 @@ if __name__ == "__main__":
         # Join metrics with their respective support counts
         metrics_df = metrics_df.copy()
         metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
-        metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['support']
+        metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['total']
         return metrics_df
+
 
     def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
         # Get support for each topic
@@ -361,16 +362,130 @@ if __name__ == "__main__":
         return overall_accuracy
 
 
-    def plot_overall_accuracy_comparison(old_metrics, new_metrics):
+    The
+    error
+    you
+    're encountering, KeyError: '
+    total
+    ', indicates that the DataFrame metrics_df does not contain a column named '
+    total
+    '. This likely happens in the function calculate_overall_accuracy.
+
+    To
+    resolve
+    this, you
+    need
+    to
+    ensure
+    that
+    the
+    DataFrame
+    passed
+    to
+    calculate_overall_accuracy
+    has
+    a
+    'total'
+    column.The
+    'total'
+    column
+    appears
+    to
+    represent
+    the
+    support(i.e., the
+    count
+    of
+    instances) for each topic in your analysis.This support data should be extracted from the analyze_disparities function.
+
+    Here’s
+    a
+    modified
+    version
+    of
+    the
+    relevant
+    functions and parts
+    of
+    your
+    code, ensuring
+    that
+    the
+    'total'
+    column is present in the
+    DataFrame
+    passed
+    to
+    calculate_overall_accuracy.
+
+    python
+
+
+    def weighted_metrics(metrics_df, support_df, metric='accuracy'):
+        # Join metrics with their respective support counts
+        metrics_df = metrics_df.copy()
+        metrics_df = metrics_df.merge(support_df, left_on='topic', right_on='subgroup')
+        metrics_df['weighted_metric'] = metrics_df[metric] * metrics_df['total']
+        return metrics_df
+
+
+    def get_top_lower_topics(test_metrics_df, test_percentage_analysis_df, metric='accuracy'):
+        # Get support for each topic
+        support_df = test_percentage_analysis_df[['subgroup', 'total']].rename(columns={'total': 'support'})
+
+        # Compute weighted metrics
+        weighted_metrics_df = weighted_metrics(test_metrics_df, support_df, metric)
+
+        # Compute baseline accuracy
+        baseline_accuracy = weighted_metrics_df['accuracy'].mean()
+
+        # Sort topics by their weighted metrics
+        sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending
+
+        # Get top 3 and bottom 3 topics
+        top_3_topics = sorted_metrics.head(3)['topic'].tolist()
+        bottom_3_topics = sorted_metrics.tail(3)['topic'].tolist()
+
+        # Adjust for baseline accuracy
+        bottom_3_topics_below_baseline = sorted_metrics[sorted_metrics['accuracy'] < baseline_accuracy].tail(3)[
+            'topic'].tolist()
+
+        return top_3_topics, bottom_3_topics_below_baseline
+
+
+    def calculate_overall_accuracy(metrics_df):
+        """
+        Calculate the overall accuracy from the metrics DataFrame.
+
+        Parameters:
+        - metrics_df: DataFrame containing the metrics
+
+        Returns:
+        - overall_accuracy: The overall accuracy
+        """
+        total_support = metrics_df['total'].sum()
+        weighted_accuracy_sum = (metrics_df['accuracy'] * metrics_df['total']).sum()
+        overall_accuracy = weighted_accuracy_sum / total_support
+        return overall_accuracy
+
+
+    def plot_overall_accuracy_comparison(old_metrics, new_metrics, support_old, support_new):
         """
         Plot the overall accuracy comparison before and after fine-tuning.
 
         Parameters:
         - old_metrics: DataFrame containing the old metrics
         - new_metrics: DataFrame containing the new metrics
+        - support_old: DataFrame containing the support data for the old metrics
+        - support_new: DataFrame containing the support data for the new metrics
         """
-        overall_accuracy_old = calculate_overall_accuracy(old_metrics)
-        overall_accuracy_new = calculate_overall_accuracy(new_metrics)
+        old_metrics_with_total = old_metrics.merge(support_old[['subgroup', 'total']], left_on='topic',
+                                                   right_on='subgroup')
+        new_metrics_with_total = new_metrics.merge(support_new[['subgroup', 'total']], left_on='topic',
+                                                   right_on='subgroup')
+
+        overall_accuracy_old = calculate_overall_accuracy(old_metrics_with_total)
+        overall_accuracy_new = calculate_overall_accuracy(new_metrics_with_total)
 
         accuracies = [overall_accuracy_old, overall_accuracy_new]
         labels = ['Old Model', 'New Model']
@@ -401,4 +516,4 @@ if __name__ == "__main__":
     print(val_analysis_v2)
 
     # Calculate and plot the overall accuracy comparison
-    plot_overall_accuracy_comparison(test_metrics, test_metrics_v2)
+    plot_overall_accuracy_comparison(test_metrics, test_metrics_v2, test_analysis, test_analysis_v2)
