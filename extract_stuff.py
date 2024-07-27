@@ -32,7 +32,7 @@ def augment_and_extract_metadata(dataset, extractor, topic_labels, file_path, de
                 print(f"DEBUG - Generated Metadata: Topic - {topic}")
                 print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
-            if int(percentage_complete % 5) == 0:
+            if int(percentage_complete) % 5 == 0:
                 print(f"Percentage of Completion: {percentage_complete:.2f}%, {count + 1} of {total_rows}")
 
             count += 1
@@ -72,7 +72,7 @@ def predict_sentiment(dataset, sentiment_analyzer, file_path, debug=False, batch
             if debug:
                 print(f"DEBUG - Processed batch {start // batch_size + 1}: {start} to {end}")
                 print(f"DEBUG - Percentage of Completion: {percentage_complete:.2f}%, {end} of {total_rows}")
-            if int(percentage_complete % 5) == 0:
+            if int(percentage_complete) % 5 == 0:
                 print(f"Percentage of Completion: {percentage_complete:.2f}%")
 
         dataset['sentiment'] = sentiments
