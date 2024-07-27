@@ -56,7 +56,7 @@ class SentimentAnalyzer:
             # Use top-k sampling and temperature sampling for more diverse outputs
             outputs = self.flan_model.generate(
                 inputs.input_ids,
-                max_length=60,
+                max_length=100,
                 num_return_sequences=1,
                 do_sample=True,
                 top_k=50,
