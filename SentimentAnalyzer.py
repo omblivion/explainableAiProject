@@ -82,8 +82,8 @@ class SentimentAnalyzer:
 
         for topic, text, sentiment in zip(topics, texts, sentiments):
             sentiment_text = self.map_target_to_label(sentiment)
-            synthetic_texts = self.generate_synthetic_data(topic, text, sentiment_text,
-                                                           n_samples)  # List of synthetic texts
+            synthetic_texts = self.generate_synthetic_data(topic, text, sentiment_text, n_samples,
+                                                           debug)  # List of synthetic texts
             generated_data['text'].extend(synthetic_texts)
             generated_data['category'].extend(
                 [sentiment] * len(synthetic_texts))  # append sentiment to texts many times
