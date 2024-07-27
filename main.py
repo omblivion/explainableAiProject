@@ -211,14 +211,14 @@ if __name__ == "__main__":
 
         # Compute weighted metrics
         weighted_metrics_df = weighted_metrics(test_metrics_df, support_df, accuracy, metric)
-        print(weighted_metrics_df)
+        # print(weighted_metrics_df)
         # Sort topics by their weighted metrics
         sorted_metrics = weighted_metrics_df.sort_values(by='weighted_metric', ascending=False)  # Sort by descending, so the first 3 are the most disadvantaged
-        print(sorted_metrics)
+        # print(sorted_metrics)
         # Get top 3 and bottom 3 topics
         bottom_3_topics = sorted_metrics[sorted_metrics['weighted_metric'] > 0].head(3)['topic'].tolist()
         top_3_topics = sorted_metrics.tail(3)['topic'].tolist()
-        print(bottom_3_topics)
+        # print(bottom_3_topics)
         return bottom_3_topics, top_3_topics
 
 
