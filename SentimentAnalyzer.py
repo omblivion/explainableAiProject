@@ -66,7 +66,7 @@ class SentimentAnalyzer:
                 num_return_sequences=1,
                 do_sample=True,
                 top_k=50,
-                temperature=0.9
+                temperature=0.7
             )
             generated_text = self.flan_tokenizer.decode(outputs[0], skip_special_tokens=True)
             synthetic_data.append(generated_text)
@@ -79,7 +79,7 @@ class SentimentAnalyzer:
         return synthetic_data
 
     # Augment the training data with synthetic data
-    def generate_training_data(self, topics, texts, sentiments, n_samples=6, debug=False):
+    def generate_training_data(self, topics, texts, sentiments, n_samples=50, debug=False):
         print("Generating synthetic data...")
         generated_data = {'text': [], 'category': []}
         generated_data_with_topic = {'text': [], 'category': [], 'topic': []}
